@@ -59,7 +59,7 @@ class LoginScreen extends StatelessWidget {
                 child: const Text('Forgot Password?'),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               height: 50,
