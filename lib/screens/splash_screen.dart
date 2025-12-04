@@ -28,7 +28,11 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.newspaper, size: 80, color: Colors.blue),
+            Image.asset(
+              'lib/assets/images/logo.png', // your image path
+              width: 100, // set width
+              height: 100, // set height
+            ),
             SizedBox(height: 20),
             Text(
               'SmartNews Nepal',
