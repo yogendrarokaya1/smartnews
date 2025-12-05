@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smartnews/screens/login_screen.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -6,6 +7,13 @@ class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Sign Up'),
+        centerTitle: true, // centers the title
+
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+      ),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -18,7 +26,7 @@ class RegisterScreen extends StatelessWidget {
               /// Title
               const Center(
                 child: Text(
-                  "Signup",
+                  "Create your account",
                   style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -71,6 +79,29 @@ class RegisterScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
+              /// phone label
+              const Text(
+                "Phone",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
+
+              /// phone TextField
+              TextField(
+                decoration: InputDecoration(
+                  hintText: "Enter your Phone number",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
               /// Password label
               const Text(
                 "Password",
@@ -93,6 +124,27 @@ class RegisterScreen extends StatelessWidget {
                 ),
               ),
 
+              const SizedBox(height: 20),
+
+              const Text(
+                "Confirm Password",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
+
+              TextField(
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: "Confirm your password",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                ),
+              ),
               const SizedBox(height: 30),
 
               /// Signup Button
@@ -107,7 +159,10 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text("Sign Up", style: TextStyle(fontSize: 16)),
+                  child: const Text(
+                    "Sign Up",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
                 ),
               ),
 
@@ -120,9 +175,17 @@ class RegisterScreen extends StatelessWidget {
                   children: [
                     const Text("Already have an account? "),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        );
+                      },
                       child: const Text(
                         "Log In",
+
                         style: TextStyle(
                           color: Color(0xFF4A7CFF),
                           fontWeight: FontWeight.w600,
