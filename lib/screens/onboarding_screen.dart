@@ -55,7 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset(
-                        'lib/assets/images/logo.png', // your image path
+                        'assets/images/logo.png', // your image path
                         width: 100, // set width
                         height: 100, // set height
                       ),
