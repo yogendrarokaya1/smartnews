@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smartnews/screens/home_screen.dart';
+import 'package:smartnews/screens/dashboar_screen.dart';
 import 'package:smartnews/screens/register_screen.dart';
 
 class LoginScreen extends StatelessWidget {
