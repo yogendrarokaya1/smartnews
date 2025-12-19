@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smartnews/screens/splash_screen.dart';
+import 'package:smartnews/theme/app_theme.dart';
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -9,12 +10,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'SmartNews Nepal',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 46, 25, 239),
-        ),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
       home: const SplashScreen(),
     );
   }
