@@ -19,3 +19,4 @@ flutter:
   uses-material-design: true
   assets:
    - assets/images/logo.png
+   - assets/images/sportnews1.jpeg
