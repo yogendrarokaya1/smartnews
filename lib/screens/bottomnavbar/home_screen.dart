@@ -9,29 +9,54 @@ class HomeTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 16),
-          // Recent News Section
+          const SizedBox(height: 12),
+
+          // ================= RECENT NEWS =================
           _sectionTitle("Recent News"),
-          _recentNewsCard(),
-          _recentNewsCard(),
+          _recentNewsCard(
+            imagePath: "assets/images/sportnews1.jpeg",
+            title: "Electronic voting in 12 hours, results in four hours",
+            date: "19th Nov 2021",
+          ),
+          _recentNewsCard(
+            imagePath: "assets/images/sportnews1.jpeg",
+            title: "Electronic voting in 12 hours, results in four hours",
+            date: "19th Nov 2021",
+          ),
 
-          // Sports Section
+          // ================= SPORTS =================
           _sectionTitle("Sports", seeMore: true),
-          _smallNewsCard("Quatar Stadium Coming Along For Last Stretch"),
-          _smallNewsCard("Preparation for Nepalgunj Marathon Completed"),
-          _smallNewsCard("Netherlands Qualifies For World Cup"),
+          _smallNewsCard(
+            imagePath: "assets/images/sportnews1.jpeg",
+            title: "Quatar Stadium Coming Along For Last Stretch",
+          ),
+          _smallNewsCard(
+            imagePath: "assets/images/sportnews1.jpeg",
+            title: "Preparation for Nepalgunj Marathon Completed",
+          ),
+          _smallNewsCard(
+            imagePath: "assets/images/sportnews1.jpeg",
+            title: "Netherlands Qualifies For World Cup",
+          ),
 
-          // International Section
+          // ================= INTERNATIONAL =================
           _sectionTitle("International", seeMore: true),
           _smallNewsCard(
-            "Pakistan on the list of countries violating religious freedom ...",
+            imagePath: "assets/images/sportnews1.jpeg",
+            title:
+                "Pakistan on the list of countries violating religious freedom ...",
           ),
           _smallNewsCard(
-            "Indian PM announces withdrawal of all three agricultural laws",
+            imagePath: "assets/images/sportnews1.jpeg",
+            title:
+                "Indian PM announces withdrawal of all three agricultural laws",
           ),
-          _smallNewsCard("5 killed in Sudan anti-military protests"),
+          _smallNewsCard(
+            imagePath: "assets/images/sportnews1.jpeg",
+            title: "5 killed in Sudan anti-military protests",
+          ),
 
-          // Trending Section
+          // ================= TRENDING =================
           _sectionTitle("Trending", seeMore: true),
           _trendingNewsItem(
             "Illegal television inaugurated by the Prime Minister",
@@ -41,33 +66,26 @@ class HomeTab extends StatelessWidget {
           ),
           _trendingNewsItem("Cantilever Bridge: Not for walking, just to see"),
 
-          // Provincial News (placeholder map)
-          _sectionTitle("Provincial News"),
-          Container(
-            height: 100,
-            color: Colors.grey[300],
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            child: const Center(child: Text("Map Placeholder")),
-          ),
-
-          // Videos Section
+          // ================= VIDEOS =================
           _sectionTitle("Videos"),
-          _videoCard(),
+          _videoCard(imagePath: "assets/images/sportnews1.jpeg"),
+
+          const SizedBox(height: 16),
         ],
       ),
     );
   }
 
-  // Section title widget
+  // ================= SECTION TITLE =================
   Widget _sectionTitle(String title, {bool seeMore = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           if (seeMore)
             const Text("See More", style: TextStyle(color: Colors.blue)),
@@ -76,68 +94,95 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  // Recent News card
-  Widget _recentNewsCard() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      height: 180,
-      decoration: BoxDecoration(
-        image: const DecorationImage(
-          image: NetworkImage("https://via.placeholder.com/400x200"),
-          fit: BoxFit.cover,
+  // ================= RECENT NEWS CARD =================
+  Widget _recentNewsCard({
+    required String imagePath,
+    required String title,
+    required String date,
+  }) {
+    return GestureDetector(
+      onTap: () {},
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        height: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          image: DecorationImage(
+            image: AssetImage(imagePath),
+            fit: BoxFit.cover,
+          ),
         ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Stack(
-        children: const [
-          Positioned(
-            bottom: 16,
-            left: 16,
-            right: 16,
-            child: Text(
-              "Electronic voting in 12 hours, results in four hours",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.transparent, Colors.black.withOpacity(0.85)],
             ),
           ),
-        ],
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title.toUpperCase(),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                date,
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  // Small news card for Sports/International
-  Widget _smallNewsCard(String title) {
+  // ================= SMALL NEWS CARD =================
+  Widget _smallNewsCard({required String imagePath, required String title}) {
     return ListTile(
-      leading: Container(
-        width: 100,
-        height: 60,
-        color: Colors.grey[300],
-        child: const Icon(Icons.image, size: 40),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.asset(imagePath, width: 90, height: 60, fit: BoxFit.cover),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+      ),
       onTap: () {},
     );
   }
 
-  // Trending news item
+  // ================= TRENDING ITEM =================
   Widget _trendingNewsItem(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
-      child: Text(title),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Text(title, style: const TextStyle(fontSize: 14)),
     );
   }
 
-  // Video card
-  Widget _videoCard() {
+  // ================= VIDEO CARD =================
+  Widget _videoCard({required String imagePath}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      height: 180,
-      color: Colors.black,
+      height: 200,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        image: DecorationImage(image: AssetImage(imagePath), fit: BoxFit.cover),
+      ),
       child: const Center(
-        child: Icon(Icons.play_circle_outline, color: Colors.white, size: 50),
+        child: Icon(Icons.play_circle_outline, color: Colors.white, size: 60),
       ),
     );
   }
