@@ -27,7 +27,6 @@ class AuthViewModel extends Notifier<AuthState> {
   Future<void> register({
     required String fullName,
     required String email,
-    required String username,
     required String password,
     String? phoneNumber,
   }) async {
@@ -37,7 +36,6 @@ class AuthViewModel extends Notifier<AuthState> {
       RegisterParams(
         fullName: fullName,
         email: email,
-        username: username,
         password: password,
         phoneNumber: phoneNumber,
       ),

@@ -10,20 +10,18 @@ import 'package:smartnews/features/auth/domain/repositories/auth_repository.dart
 class RegisterParams extends Equatable {
   final String fullName;
   final String email;
-  final String username;
   final String password;
   final String? phoneNumber;
 
   const RegisterParams({
     required this.fullName,
     required this.email,
-    required this.username,
     required this.password,
     this.phoneNumber,
   });
 
   @override
-  List<Object?> get props => [fullName, email, username, password, phoneNumber];
+  List<Object?> get props => [fullName, email, password, phoneNumber];
 }
 
 // Create Provider

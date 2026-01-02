@@ -62,7 +62,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
           .register(
             fullName: _nameController.text.trim(),
             email: _emailController.text.trim(),
-            username: _emailController.text.trim().split('@').first,
             password: _passwordController.text,
             phoneNumber: '$_selectedCountryCode${_phoneController.text.trim()}',
           );
