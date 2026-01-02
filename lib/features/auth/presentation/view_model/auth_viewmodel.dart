@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smartnews_v2/features/auth/domain/usecases/get_current_user_usecase.dart';
-import 'package:smartnews_v2/features/auth/domain/usecases/login_usecase.dart';
-import 'package:smartnews_v2/features/auth/domain/usecases/logout_usecase.dart';
-import 'package:smartnews_v2/features/auth/domain/usecases/register_usecase.dart';
-import 'package:smartnews_v2/features/auth/presentation/state/auth_state.dart';
+import 'package:smartnews/features/auth/domain/usecases/get_current_user_usecase.dart';
+import 'package:smartnews/features/auth/domain/usecases/login_usecase.dart';
+import 'package:smartnews/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:smartnews/features/auth/domain/usecases/register_usecase.dart';
+import 'package:smartnews/features/auth/presentation/state/auth_state.dart';
 
 final authViewModelProvider = NotifierProvider<AuthViewModel, AuthState>(
   AuthViewModel.new,

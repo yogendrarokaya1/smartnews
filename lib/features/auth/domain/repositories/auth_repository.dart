@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:smartnews_v2/core/error/failures.dart';
-import 'package:smartnews_v2/features/auth/domain/entities/auth_entity.dart';
+import 'package:smartnews/core/error/failures.dart';
+import 'package:smartnews/features/auth/domain/entities/auth_entity.dart';
 
 abstract interface class IAuthRepository {
   Future<Either<Failure, bool>> register(AuthEntity user);
