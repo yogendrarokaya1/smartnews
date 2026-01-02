@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smartnews/features/auth/presentation/state/auth_state.dart';
+import 'package:smartnews/features/auth/presentation/view_model/auth_viewmodel.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/theme_extensions.dart';
