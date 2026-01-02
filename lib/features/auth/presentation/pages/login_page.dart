@@ -46,7 +46,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   void _handleForgotPassword() {
     // TODO: Implement forgot password
-    SnackbarUtils.showInfo(context, 'Forgot password feature coming soon');
+    SnackbarUtils.showInfo(context, 'Forgot password feature');
   }
 
   void _handleGoogleSignIn() {
