@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:smartnews_v2/features/dashboard/presentation/pages/bottomnavbar/bookmark_screen.dart';
-import 'package:smartnews_v2/features/dashboard/presentation/pages/bottomnavbar/home_screen.dart';
-import 'package:smartnews_v2/features/dashboard/presentation/pages/bottomnavbar/categories_screen.dart';
-import 'package:smartnews_v2/features/dashboard/presentation/pages/bottomnavbar/profile_screen.dart';
+import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/bookmark_screen.dart';
+import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/categories_screen.dart';
+import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/home_screen.dart';
+import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
