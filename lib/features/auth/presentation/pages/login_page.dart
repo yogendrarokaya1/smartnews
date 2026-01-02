@@ -49,16 +49,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     SnackbarUtils.showInfo(context, 'Forgot password feature');
   }
 
-  void _handleGoogleSignIn() {
-    // TODO: Implement Google Sign In
-    SnackbarUtils.showInfo(context, 'Google Sign In coming soon');
-  }
-
-  void _handleAppleSignIn() {
-    // TODO: Implement Apple Sign In
-    SnackbarUtils.showInfo(context, 'Apple Sign In coming soon');
-  }
-
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authViewModelProvider);
@@ -244,60 +234,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                     ),
                     Expanded(child: Divider()),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Social Login Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _handleGoogleSignIn,
-                        icon: SvgPicture.asset(
-                          'assets/icons/google_logo.svg',
-                          width: 20,
-                          height: 20,
-                          colorFilter: isDarkMode
-                              ? const ColorFilter.mode(
-                                  AppColors.darkTextPrimary,
-                                  BlendMode.srcIn,
-                                )
-                              : null,
-                        ),
-                        label: Text('Google'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _handleAppleSignIn,
-                        icon: SvgPicture.asset(
-                          'assets/icons/apple_logo.svg',
-                          width: 20,
-                          height: 20,
-                          colorFilter: isDarkMode
-                              ? const ColorFilter.mode(
-                                  AppColors.darkTextPrimary,
-                                  BlendMode.srcIn,
-                                )
-                              : null,
-                        ),
-                        label: Text('Apple'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 24),
