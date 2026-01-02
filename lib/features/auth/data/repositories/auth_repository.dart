@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smartnews_v2/core/error/failures.dart';
-import 'package:smartnews_v2/features/auth/data/datasources/auth_datasource.dart';
-import 'package:smartnews_v2/features/auth/data/datasources/local/auth_local_datasource.dart';
-import 'package:smartnews_v2/features/auth/data/models/auth_hive_model.dart';
-import 'package:smartnews_v2/features/auth/domain/entities/auth_entity.dart';
-import 'package:smartnews_v2/features/auth/domain/repositories/auth_repository.dart';
+import 'package:smartnews/core/error/failures.dart';
+import 'package:smartnews/features/auth/data/datasources/auth_datasource.dart';
+import 'package:smartnews/features/auth/data/datasources/local/auth_local_datasource.dart';
+import 'package:smartnews/features/auth/data/models/auth_hive_model.dart';
+import 'package:smartnews/features/auth/domain/entities/auth_entity.dart';
+import 'package:smartnews/features/auth/domain/repositories/auth_repository.dart';
 
 // Create provider
 final authRepositoryProvider = Provider<IAuthRepository>((ref) {

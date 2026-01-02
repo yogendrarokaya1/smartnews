@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smartnews_v2/core/error/failures.dart';
-import 'package:smartnews_v2/core/usecases/app_usecases.dart';
-import 'package:smartnews_v2/features/auth/data/repositories/auth_repository.dart';
-import 'package:smartnews_v2/features/auth/domain/entities/auth_entity.dart';
-import 'package:smartnews_v2/features/auth/domain/repositories/auth_repository.dart';
+import 'package:smartnews/core/error/failures.dart';
+import 'package:smartnews/core/usecases/app_usecases.dart';
+import 'package:smartnews/features/auth/data/repositories/auth_repository.dart';
+import 'package:smartnews/features/auth/domain/entities/auth_entity.dart';
+import 'package:smartnews/features/auth/domain/repositories/auth_repository.dart';
 
 class LoginParams extends Equatable {
   final String email;
