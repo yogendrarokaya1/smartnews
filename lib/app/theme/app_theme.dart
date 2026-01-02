@@ -27,7 +27,12 @@ class AppTheme {
           fontWeight: FontWeight.w600,
         ),
       ),
-
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Color(0xFF4A7CFF),
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white70,
+        type: BottomNavigationBarType.fixed,
+      ),
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
