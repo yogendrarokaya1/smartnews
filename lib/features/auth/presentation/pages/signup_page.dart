@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smartnews_v2/features/auth/presentation/state/auth_state.dart';
-import 'package:smartnews_v2/features/auth/presentation/view_model/auth_viewmodel.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/theme_extensions.dart';
 import '../../../../core/widgets/gradient_button.dart';
