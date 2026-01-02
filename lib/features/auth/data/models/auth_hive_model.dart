@@ -1,6 +1,7 @@
 import 'package:hive/hive.dart';
-import 'package:smartnews_v2/core/constants/hive_table_constant.dart';
-import 'package:smartnews_v2/features/auth/domain/entities/auth_entity.dart';
+import 'package:smartnews/core/constants/hive_table_constant.dart';
+import 'package:smartnews/features/auth/domain/entities/auth_entity.dart';
+
 import 'package:uuid/uuid.dart';
 
 // INFO: dart run build_runner build -d

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smartnews_v2/app/app.dart';
-import 'package:smartnews_v2/core/services/hive/hive_service.dart';
+import 'package:smartnews/app/app.dart';
+import 'package:smartnews/core/services/hive/hive_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

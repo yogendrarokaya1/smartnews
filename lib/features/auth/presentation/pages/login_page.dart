@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:smartnews_v2/features/dashboard/presentation/pages/dashboar_screen.dart';
+import 'package:smartnews/features/dashboard/presentation/pages/dashboar_screen.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/snackbar_utils.dart';

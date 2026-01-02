@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:smartnews_v2/core/error/failures.dart';
+import 'package:smartnews/core/error/failures.dart';
 
 abstract interface class UsecaseWithParms<SucessType, Params> {
   Future<Either<Failure, SucessType>> call(Params params);
