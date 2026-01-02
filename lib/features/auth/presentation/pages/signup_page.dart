@@ -123,29 +123,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   Center(
                     child: Column(
                       children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withAlpha(50),
-                                blurRadius: 24,
-                                offset: const Offset(0, 12),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.person_add_rounded,
-                            size: 40,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
                         Text(
-                          'Join Us Today',
+                          'Create New Account',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
@@ -153,13 +132,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'Create your account to get started',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: context.textSecondary.withAlpha(180),
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -407,7 +379,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
                   // Sign Up Button
                   GradientButton(
-                    text: 'Create Account',
+                    text: 'Sign Up',
                     onPressed: _handleSignup,
                     isLoading: authState.status == AuthStatus.loading,
                   ),
