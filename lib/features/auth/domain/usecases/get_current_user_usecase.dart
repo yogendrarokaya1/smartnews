@@ -1,0 +1,25 @@
+import 'package:dartz/dartz.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smartnews_v2/core/error/failures.dart';
+import 'package:smartnews_v2/core/usecases/app_usecases.dart';
+import 'package:smartnews_v2/features/auth/data/repositories/auth_repository.dart';
+import 'package:smartnews_v2/features/auth/domain/entities/auth_entity.dart';
+import 'package:smartnews_v2/features/auth/domain/repositories/auth_repository.dart';
+
+// Create Provider
+final getCurrentUserUsecaseProvider = Provider<GetCurrentUserUsecase>((ref) {
+  final authRepository = ref.read(authRepositoryProvider);
+  return GetCurrentUserUsecase(authRepository: authRepository);
+});
+
+class GetCurrentUserUsecase implements UsecaseWithoutParms<AuthEntity> {
+  final IAuthRepository _authRepository;
+
+  GetCurrentUserUsecase({required IAuthRepository authRepository})
+    : _authRepository = authRepository;
+
+  @override
+  Future<Either<Failure, AuthEntity>> call() {
+    return _authRepository.getCurrentUser();
+  }
+}
