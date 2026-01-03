@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:smartnews/app/routes/app_routes.dart';
+import 'package:smartnews/features/auth/presentation/pages/login_page.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/bookmark_screen.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/categories_screen.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/home_screen.dart';
@@ -97,18 +99,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
-          children: const [
-            DrawerHeader(
+          children: [
+            const DrawerHeader(
               decoration: BoxDecoration(color: Color(0xFF4A7CFF)),
               child: Text(
                 "SmartNews Nepal",
                 style: TextStyle(color: Colors.white, fontSize: 20),
               ),
             ),
-            ListTile(leading: Icon(Icons.home), title: Text("Home")),
-            ListTile(leading: Icon(Icons.category), title: Text("Categories")),
-            ListTile(leading: Icon(Icons.bookmark), title: Text("Bookmarks")),
-            ListTile(leading: Icon(Icons.person), title: Text("Profile")),
+            const ListTile(leading: Icon(Icons.home), title: Text("Home")),
+            const ListTile(
+              leading: Icon(Icons.category),
+              title: Text("Categories"),
+            ),
+            const ListTile(
+              leading: Icon(Icons.bookmark),
+              title: Text("Bookmarks"),
+            ),
+            const ListTile(leading: Icon(Icons.person), title: Text("Profile")),
+            const Divider(),
+
+            // 🔴 LOGOUT
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text("Logout", style: TextStyle(color: Colors.red)),
+              onTap: () {
+                _logout(context);
+              },
+            ),
           ],
         ),
       ),
@@ -135,6 +153,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
+    );
+  }
+
+  void _logout(BuildContext context) {
+    Navigator.pop(context);
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (route) => false,
     );
   }
 }

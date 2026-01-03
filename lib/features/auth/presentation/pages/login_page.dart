@@ -78,22 +78,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               children: [
                 const SizedBox(height: 40),
 
-                // Softwarica Logo
-                Center(
-                  child: SvgPicture.asset(
-                    'assets/svg/softwarica_logo.svg',
-                    width: 200,
-                    height: 70,
-                    colorFilter: ColorFilter.mode(
-                      isDarkMode
-                          ? AppColors.darkTextPrimary
-                          : AppColors.primary,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-
                 // Title
                 Text(
                   'Welcome Back!',
