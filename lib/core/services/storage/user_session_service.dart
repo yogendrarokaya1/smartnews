@@ -20,7 +20,6 @@
 //   static const String _keyUserId = 'user_id';
 //   static const String _keyUserEmail = 'user_email';
 //   static const String _keyUserFullName = 'user_full_name';
-//   static const String _keyUserUsername = 'user_username';
 //   static const String _keyUserPhoneNumber = 'user_phone_number';
 //   static const String _keyUserProfilePicture = 'user_profile_picture';
 //   UserSessionService({required SharedPreferences prefs}) : _prefs = prefs;
@@ -39,7 +38,6 @@
 //     await _prefs.setString(_keyUserId, userId);
 //     await _prefs.setString(_keyUserEmail, email);
 //     await _prefs.setString(_keyUserFullName, fullName);
-//     await _prefs.setString(_keyUserUsername, username);
 //     if (phoneNumber != null) {
 //       await _prefs.setString(_keyUserPhoneNumber, phoneNumber);
 //     }
@@ -69,19 +67,9 @@
 //     return _prefs.getString(_keyUserFullName);
 //   }
 
-//   // Get current user username
-//   String? getCurrentUserUsername() {
-//     return _prefs.getString(_keyUserUsername);
-//   }
-
 //   // Get current user phone number
 //   String? getCurrentUserPhoneNumber() {
 //     return _prefs.getString(_keyUserPhoneNumber);
-//   }
-
-//   // Get current user batch ID
-//   String? getCurrentUserBatchId() {
-//     return _prefs.getString(_keyUserBatchId);
 //   }
 
 //   // Get current user profile picture
@@ -95,9 +83,7 @@
 //     await _prefs.remove(_keyUserId);
 //     await _prefs.remove(_keyUserEmail);
 //     await _prefs.remove(_keyUserFullName);
-//     await _prefs.remove(_keyUserUsername);
 //     await _prefs.remove(_keyUserPhoneNumber);
-//     await _prefs.remove(_keyUserBatchId);
 //     await _prefs.remove(_keyUserProfilePicture);
 //   }
 // }
