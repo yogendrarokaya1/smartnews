@@ -3,12 +3,12 @@ import 'package:smartnews/core/services/hive/hive_service.dart';
 import 'package:smartnews/features/auth/data/datasources/auth_datasource.dart';
 import 'package:smartnews/features/auth/data/models/auth_hive_model.dart';
 
-final authLocalDatasourceProvider = Provider<IAuthDataSource>((ref) {
+final authLocalDatasourceProvider = Provider<IAuthLocalDataSource>((ref) {
   final hiveService = ref.watch(hiveServiceProvider);
   return AuthLocalDataSource(hiveService: hiveService);
 });
 
-class AuthLocalDataSource implements IAuthDataSource {
+class AuthLocalDataSource implements IAuthLocalDataSource {
   final HiveService _hiveService;
 
   AuthLocalDataSource({required HiveService hiveService})
