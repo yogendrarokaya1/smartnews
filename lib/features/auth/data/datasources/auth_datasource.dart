@@ -1,6 +1,6 @@
 import 'package:smartnews/features/auth/data/models/auth_hive_model.dart';
 
-abstract interface class IAuthDataSource {
+abstract interface class IAuthLocalDataSource {
   Future<AuthHiveModel> register(AuthHiveModel user);
   Future<AuthHiveModel?> login(String email, String password);
   Future<AuthHiveModel?> getCurrentUser();
@@ -9,4 +9,10 @@ abstract interface class IAuthDataSource {
   Future<AuthHiveModel?> getUserByEmail(String email);
   Future<bool> updateUser(AuthHiveModel user);
   Future<bool> deleteUser(String authId);
+}
+
+abstract interface class IAuthRemoteDataSource {
+  Future<AuthHiveModel> register(AuthHiveModel user);
+  Future<AuthHiveModel> login(String email, String password);
+  Future<AuthHiveModel?> getUserById(String authId);
 }
