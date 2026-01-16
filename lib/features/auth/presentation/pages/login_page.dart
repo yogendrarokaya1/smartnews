@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/dashboar_screen.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../../app/theme/app_colors.dart';
@@ -52,7 +51,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authViewModelProvider);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    // final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor =
         Theme.of(context).textTheme.bodyLarge?.color ?? AppColors.textDark;
     final secondaryTextColor =

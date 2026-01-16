@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:smartnews/app/routes/app_routes.dart';
-import 'package:smartnews/features/auth/presentation/pages/login_page.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/bookmark_screen.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/categories_screen.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/home_screen.dart';
@@ -120,13 +118,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const Divider(),
 
             // 🔴 LOGOUT
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text("Logout", style: TextStyle(color: Colors.red)),
-              onTap: () {
-                _logout(context);
-              },
-            ),
           ],
         ),
       ),
@@ -153,16 +144,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
-    );
-  }
-
-  void _logout(BuildContext context) {
-    Navigator.pop(context);
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-      (route) => false,
     );
   }
 }
