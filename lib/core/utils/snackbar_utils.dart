@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../app/theme/app_colors.dart';
+import 'package:smartnews/app/theme/app_colors.dart';
 
 class SnackbarUtils {
   static void showError(BuildContext context, String message) {
