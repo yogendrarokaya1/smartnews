@@ -7,31 +7,32 @@ abstract interface class INetworkInfo {
   Future<bool> get isConnected;
 }
 
-final networkInfoProvider = Provider<INetworkInfo>((ref) {
-  final connectivity = Connectivity();
-  return NetworkInfo(connectivity);
+final networkInfoProvider = Provider<NetworkInfo>((ref) {
+  return NetworkInfo(connectivity: Connectivity());
 });
 
 class NetworkInfo implements INetworkInfo {
   final Connectivity _connectivity;
-  NetworkInfo(this._connectivity);
+
+  NetworkInfo({required Connectivity connectivity})
+    : _connectivity = connectivity;
 
   @override
   Future<bool> get isConnected async {
-    // Implement actual connectivity check logic here
     final result = await _connectivity.checkConnectivity();
-    if (result == ConnectivityResult.none) {
+    if (result.contains(ConnectivityResult.none)) {
       return false;
     }
-    return await _internetchha(); // Placeholder implementation
-  }
 
-  Future<bool> _internetchha() async {
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    } catch (e) {
-      return false;
-    }
+    return await _isActuallyConnectedToInternet();
+  }
+}
+
+Future<bool> _isActuallyConnectedToInternet() async {
+  try {
+    final result = await InternetAddress.lookup('google.com');
+    return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+  } on SocketException catch (_) {
+    return false;
   }
 }

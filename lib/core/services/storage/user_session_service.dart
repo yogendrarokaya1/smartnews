@@ -1,89 +1,84 @@
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// // SharedPreferences instance provider
-// final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-//   throw UnimplementedError('SharedPreferences must be overridden in main.dart');
-// });
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError('SharedPreferences must be overridden in main.dart');
+});
 
-// // UserSessionService provider
-// final userSessionServiceProvider = Provider<UserSessionService>((ref) {
-//   final prefs = ref.read(sharedPreferencesProvider);
-//   return UserSessionService(prefs: prefs);
-// });
+final userSessionServiceProvider = Provider<UserSessionService>((ref) {
+  final prefs = ref.read(sharedPreferencesProvider);
+  return UserSessionService(prefs: prefs);
+});
 
-// class UserSessionService {
-//   final SharedPreferences _prefs;
+class UserSessionService {
+  final SharedPreferences _prefs;
 
-//   // Keys for storing user data
-//   static const String _keyIsLoggedIn = 'is_logged_in';
-//   static const String _keyUserId = 'user_id';
-//   static const String _keyUserEmail = 'user_email';
-//   static const String _keyUserFullName = 'user_full_name';
-//   static const String _keyUserPhoneNumber = 'user_phone_number';
-//   static const String _keyUserProfilePicture = 'user_profile_picture';
-//   UserSessionService({required SharedPreferences prefs}) : _prefs = prefs;
+  static const String _keyIsLoggedIn = 'is_logged_in';
+  static const String _keyUserId = 'user_id';
+  static const String _keyEmail = 'email';
+  static const String _keyfullName = 'full_name';
+  static const String _keyphoneNumber = 'phone_number';
+  static const String _keyRole = 'role';
 
-//   // Save user session after login
-//   Future<void> saveUserSession({
-//     required String userId,
-//     required String email,
-//     required String fullName,
-//     required String username,
-//     String? phoneNumber,
-//     String? batchId,
-//     String? profilePicture,
-//   }) async {
-//     await _prefs.setBool(_keyIsLoggedIn, true);
-//     await _prefs.setString(_keyUserId, userId);
-//     await _prefs.setString(_keyUserEmail, email);
-//     await _prefs.setString(_keyUserFullName, fullName);
-//     if (phoneNumber != null) {
-//       await _prefs.setString(_keyUserPhoneNumber, phoneNumber);
-//     }
+  UserSessionService({required SharedPreferences prefs}) : _prefs = prefs;
 
-//     if (profilePicture != null) {
-//       await _prefs.setString(_keyUserProfilePicture, profilePicture);
-//     }
-//   }
+  Future<void> saveUserSession({
+    required String userId,
+    String? email,
+    String? fullName,
+    String? phoneNumber,
+    String? role,
+  }) async {
+    await _prefs.setBool(_keyIsLoggedIn, true);
+    await _prefs.setString(_keyUserId, userId);
 
-//   // Check if user is logged in
-//   bool isLoggedIn() {
-//     return _prefs.getBool(_keyIsLoggedIn) ?? false;
-//   }
+    if (email != null) {
+      await _prefs.setString(_keyEmail, email);
+    }
 
-//   // Get current user ID
-//   String? getCurrentUserId() {
-//     return _prefs.getString(_keyUserId);
-//   }
+    if (fullName != null) {
+      await _prefs.setString(_keyfullName, fullName);
+    }
 
-//   // Get current user email
-//   String? getCurrentUserEmail() {
-//     return _prefs.getString(_keyUserEmail);
-//   }
+    if (phoneNumber != null) {
+      await _prefs.setString(_keyphoneNumber, phoneNumber);
+    }
 
-//   // Get current user full name
-//   String? getCurrentUserFullName() {
-//     return _prefs.getString(_keyUserFullName);
-//   }
+    if (role != null) {
+      await _prefs.setString(_keyRole, role);
+    }
+  }
 
-//   // Get current user phone number
-//   String? getCurrentUserPhoneNumber() {
-//     return _prefs.getString(_keyUserPhoneNumber);
-//   }
+  bool isLoggedIn() {
+    return _prefs.getBool(_keyIsLoggedIn) ?? false;
+  }
 
-//   // Get current user profile picture
-//   String? getCurrentUserProfilePicture() {
-//     return _prefs.getString(_keyUserProfilePicture);
-//   }
+  String? getCurrentUserId() {
+    return _prefs.getString(_keyUserId);
+  }
 
-//   // Clear user session (logout)
-//   Future<void> clearSession() async {
-//     await _prefs.remove(_keyIsLoggedIn);
-//     await _prefs.remove(_keyUserId);
-//     await _prefs.remove(_keyUserEmail);
-//     await _prefs.remove(_keyUserFullName);
-//     await _prefs.remove(_keyUserPhoneNumber);
-//     await _prefs.remove(_keyUserProfilePicture);
-//   }
-// }
+  String? getCurrentUserEmail() {
+    return _prefs.getString(_keyEmail);
+  }
+
+  String? getCurrentUserFullName() {
+    return _prefs.getString(_keyfullName);
+  }
+
+  String? getCurrentUserPhoneNumber() {
+    return _prefs.getString(_keyphoneNumber);
+  }
+
+  String? getCurrentUserRole() {
+    return _prefs.getString(_keyRole);
+  }
+
+  Future<void> clearSession() async {
+    await _prefs.remove(_keyIsLoggedIn);
+    await _prefs.remove(_keyUserId);
+    await _prefs.remove(_keyEmail);
+    await _prefs.remove(_keyfullName);
+    await _prefs.remove(_keyphoneNumber);
+    await _prefs.remove(_keyRole);
+  }
+}

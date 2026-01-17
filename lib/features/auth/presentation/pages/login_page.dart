@@ -32,7 +32,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (_formKey.currentState!.validate()) {
       await ref
           .read(authViewModelProvider.notifier)
-          .login(
+          .loginUser(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );

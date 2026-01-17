@@ -1,49 +1,80 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smartnews/core/services/hive/hive_service.dart';
+import 'package:smartnews/core/services/storage/user_session_service.dart';
 import 'package:smartnews/features/auth/data/datasources/auth_datasource.dart';
 import 'package:smartnews/features/auth/data/models/auth_hive_model.dart';
 
-final authLocalDatasourceProvider = Provider<IAuthDataSource>((ref) {
+final authLocalDatasourceProvider = Provider<AuthLocalDatasource>((ref) {
   final hiveService = ref.watch(hiveServiceProvider);
-  return AuthLocalDataSource(hiveService: hiveService);
+  final userSessionService = ref.read(userSessionServiceProvider);
+
+  return AuthLocalDatasource(
+    hiveService: hiveService,
+    userSessionService: userSessionService,
+  );
 });
 
-class AuthLocalDataSource implements IAuthDataSource {
+class AuthLocalDatasource implements IAuthLocalDataSource {
   final HiveService _hiveService;
+  final UserSessionService _userSessionService;
 
-  AuthLocalDataSource({required HiveService hiveService})
-    : _hiveService = hiveService;
+  AuthLocalDatasource({
+    required HiveService hiveService,
+    required UserSessionService userSessionService,
+  }) : _hiveService = hiveService,
+       _userSessionService = userSessionService;
 
   @override
-  Future<AuthHiveModel> register(AuthHiveModel user) async {
+  Future<AuthHiveModel> registerUser(AuthHiveModel user) async {
     return await _hiveService.registerUser(user);
   }
 
   @override
-  Future<AuthHiveModel?> login(String email, String password) async {
+  Future<AuthHiveModel?> loginUser(String email, String password) async {
     try {
-      return await _hiveService.loginUser(email, password);
+      final user = _hiveService.loginUser(email, password);
+
+      if (user != null && user.authId != null) {
+        await _userSessionService.saveUserSession(
+          userId: user.authId!,
+          email: user.email,
+          fullName: user.fullName,
+          phoneNumber: user.phoneNumber,
+          role: user.role,
+        );
+      }
+
+      return user;
     } catch (e) {
       return null;
+    }
+  }
+
+  @override
+  Future<bool> logoutUser() async {
+    try {
+      await _userSessionService.clearSession();
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 
   @override
   Future<AuthHiveModel?> getCurrentUser() async {
     try {
-      return await _hiveService.getCurrentUser();
+      if (!_userSessionService.isLoggedIn()) {
+        return null;
+      }
+
+      final userId = _userSessionService.getCurrentUserId();
+      if (userId == null) {
+        return null;
+      }
+
+      return _hiveService.getUserById(userId);
     } catch (e) {
       return null;
-    }
-  }
-
-  @override
-  Future<bool> logout() async {
-    try {
-      await _hiveService.logoutUser();
-      return true;
-    } catch (e) {
-      return false;
     }
   }
 

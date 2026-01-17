@@ -1,72 +1,62 @@
 import 'package:smartnews/features/auth/domain/entities/auth_entity.dart';
 
 class AuthApiModel {
-  final String id;
-  final String fullName;
-  final String email;
-  final String phoneNumber;
-  final String role;
-  final String token;
+  final String? id;
+  final String? fullName;
+  final String? email;
+  final String? phoneNumber;
+  final String? password;
+  final String? role;
 
   AuthApiModel({
-    required this.id,
-    required this.fullName,
-    required this.email,
-    required this.phoneNumber,
-    required this.role,
-    required this.token,
+    this.id,
+    this.fullName,
+    this.email,
+    this.phoneNumber,
+    this.role,
+    this.password,
   });
+
+  Map<String, dynamic> toJson() {
+    final data = <String, dynamic>{};
+
+    if (fullName != null) data['fullName'] = fullName;
+    if (email != null) data['email'] = email;
+    if (phoneNumber != null) data['phoneNumber'] = phoneNumber;
+    if (password != null) {
+      data['password'] = password;
+      data['confirmPassword'] = password;
+    }
+    return data;
+  }
 
   factory AuthApiModel.fromJson(Map<String, dynamic> json) {
     return AuthApiModel(
-      id: json['user']['_id'],
-      fullName: json['user']['fullName'],
-      email: json['user']['email'],
-      phoneNumber: json['user']['phoneNumber'],
-      role: json['user']['role'],
-      token: json['token'],
+      id: json['_id'],
+      fullName: json['fullName'],
+      email: json['email'],
+      phoneNumber: json['phoneNumber'],
+      role: json['role'],
     );
   }
 
-  //to json
-  Map<String, dynamic> toJson() {
-    return {
-      'user': {
-        '_id': id,
-        'fullName': fullName,
-        'email': email,
-        'phoneNumber': phoneNumber,
-        'role': role,
-      },
-      'token': token,
-    };
-  }
-
-  // Info: To Entity
   AuthEntity toEntity() {
     return AuthEntity(
       authId: id,
       fullName: fullName,
       email: email,
       phoneNumber: phoneNumber,
-      password: null,
-      profilePicture: null,
+      role: role,
     );
   }
 
-  // Info: From Entity (factory function)
-  factory AuthApiModel.fromEntity(
-    AuthEntity entity,
-    String role,
-    String token,
-  ) {
+  factory AuthApiModel.fromEntity(AuthEntity entity) {
     return AuthApiModel(
-      id: entity.authId ?? '',
       fullName: entity.fullName,
       email: entity.email,
-      phoneNumber: entity.phoneNumber ?? '',
-      role: role,
-      token: token,
+      password: entity.password,
+      phoneNumber: entity.phoneNumber,
+      role: entity.role,
     );
   }
 }

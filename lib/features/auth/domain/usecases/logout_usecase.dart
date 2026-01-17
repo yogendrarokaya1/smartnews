@@ -19,6 +19,6 @@ class LogoutUsecase implements UsecaseWithoutParms<bool> {
 
   @override
   Future<Either<Failure, bool>> call() {
-    return _authRepository.logout();
+    return _authRepository.logoutUser();
   }
 }

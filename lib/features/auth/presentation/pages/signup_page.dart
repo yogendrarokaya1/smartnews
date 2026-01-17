@@ -59,7 +59,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     if (_formKey.currentState!.validate()) {
       await ref
           .read(authViewModelProvider.notifier)
-          .register(
+          .registerUser(
             fullName: _nameController.text.trim(),
             email: _emailController.text.trim(),
             password: _passwordController.text,
