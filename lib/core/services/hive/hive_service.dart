@@ -37,12 +37,12 @@ class HiveService {
   Box<AuthHiveModel> get _authBox =>
       Hive.box<AuthHiveModel>(HiveTableConstant.userTable);
 
-  Future<AuthHiveModel> registerUser(AuthHiveModel user) async {
+  Future<AuthHiveModel> register(AuthHiveModel user) async {
     await _authBox.put(user.authId, user);
     return user;
   }
 
-  AuthHiveModel? loginUser(String email, String password) {
+  AuthHiveModel? login(String email, String password) {
     try {
       return _authBox.values.firstWhere(
         (user) => user.email == email && user.password == password,

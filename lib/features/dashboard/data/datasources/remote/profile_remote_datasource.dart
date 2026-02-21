@@ -1,7 +1,12 @@
-import 'package:dio/dio.dart';
+import 'dart:io';
 import '../../models/user_model.dart';
 
 abstract class ProfileRemoteDataSource {
-  Future<UserModel> getProfile();
-  Future<UserModel> updateProfile(String name, String? avatarPath);
+  Future<UserModel> getCurrentUser();
+  Future<UserModel> updateProfile({
+    String? fullName,
+    String? email,
+    String? phoneNumber,
+    File? profilePicture,
+  });
 }

@@ -2,11 +2,10 @@ import 'package:smartnews/features/auth/data/models/auth_api_model.dart';
 import 'package:smartnews/features/auth/data/models/auth_hive_model.dart';
 
 abstract interface class IAuthLocalDataSource {
-  Future<AuthHiveModel> registerUser(AuthHiveModel user);
-  Future<AuthHiveModel?> loginUser(String email, String password);
+  Future<AuthHiveModel> register(AuthHiveModel user);
+  Future<AuthHiveModel?> login(String email, String password);
   Future<AuthHiveModel?> getCurrentUser();
-  Future<bool> logoutUser();
-
+  Future<bool> logout();
   Future<AuthHiveModel?> getUserById(String authId);
   Future<AuthHiveModel?> getUserByEmail(String email);
   Future<bool> updateUser(AuthHiveModel user);
@@ -14,8 +13,7 @@ abstract interface class IAuthLocalDataSource {
 }
 
 abstract interface class IAuthRemoteDataSource {
-  Future<AuthApiModel> registerUser(AuthApiModel user);
-  Future<AuthApiModel?> loginUser(String email, String password);
-  Future<AuthApiModel?> getCurrentUser();
-  Future<bool> logoutUser();
+  Future<AuthApiModel> register(AuthApiModel user);
+  Future<AuthApiModel?> login(String email, String password);
+  Future<AuthApiModel?> getUserById(String authId);
 }
