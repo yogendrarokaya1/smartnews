@@ -1,57 +1,76 @@
-// import 'package:dio/dio.dart';
-// import '../../models/user_model.dart';
-// import 'profile_remote_datasource.dart';
-
-// class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
-//   final Dio dio;
-
-//   ProfileRemoteDataSourceImpl(this.dio);
-
-//   @override
-//   Future<UserModel> getProfile() async {
-//     final response = await dio.get('/user/profile');
-//     return UserModel.fromJson(response.data);
-//   }
-
-//   @override
-//   Future<UserModel> updateProfile(String name, String? avatarPath) async {
-//     final Map<String, dynamic> data = {'name': name};
-
-//     if (avatarPath != null) {
-//       data['avatar'] = await MultipartFile.fromFile(avatarPath);
-//     }
-
-//     final formData = FormData.fromMap(data);
-
-//     final response = await dio.put('/user/profile', data: formData);
-
-//     return UserModel.fromJson(response.data);
-//   }
-// }
-
+import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:smartnews/features/dashboard/data/datasources/remote/profile_remote_datasource_impl.dart'
-    as ApiEndpoints;
-import 'package:smartnews/features/dashboard/data/models/user_model.dart';
+import '../../../../../core/api/api_client.dart';
+import '../../../../../core/api/api_endpoints.dart';
+import '../../models/user_model.dart';
+import 'profile_remote_datasource.dart';
 
-@override
-Future<UserModel> getProfile() async {
-  final response = await dio.get(ApiEndpoints.getProfile);
-  return UserModel.fromJson(response.data);
-}
+class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
+  final ApiClient apiClient;
 
-@override
-Future<UserModel> updateProfile(String name, String? avatarPath) async {
-  final data = {'name': name};
+  ProfileRemoteDataSourceImpl({required this.apiClient});
 
-  if (avatarPath != null) {
-    data['avatar'] = (await MultipartFile.fromFile(avatarPath)) as String;
+  @override
+  Future<UserModel> getCurrentUser() async {
+    try {
+      final response = await apiClient.get(ApiEndpoints.whoAmI);
+
+      if (response.data['success'] == true) {
+        return UserModel.fromJson(response.data['data']);
+      }
+      throw Exception(
+        response.data['message'] ?? 'Failed to fetch user profile',
+      );
+    } on DioException catch (e) {
+      throw Exception('Failed to fetch profile: ${e.message}');
+    }
   }
 
-  final response = await dio.put(
-    ApiEndpoints.updateProfile,
-    data: FormData.fromMap(data),
-  );
+  @override
+  Future<UserModel> updateProfile({
+    String? fullName,
+    String? email,
+    String? phoneNumber,
+    File? profilePicture,
+  }) async {
+    try {
+      FormData formData = FormData();
 
-  return UserModel.fromJson(response.data);
+      // Add text fields
+      if (fullName != null) {
+        formData.fields.add(MapEntry('fullName', fullName));
+      }
+      if (email != null) {
+        formData.fields.add(MapEntry('email', email));
+      }
+      if (phoneNumber != null) {
+        formData.fields.add(MapEntry('phoneNumber', phoneNumber));
+      }
+
+      // Add profile picture if provided
+      if (profilePicture != null) {
+        formData.files.add(
+          MapEntry(
+            'profilePicture',
+            await MultipartFile.fromFile(
+              profilePicture.path,
+              filename: profilePicture.path.split('/').last,
+            ),
+          ),
+        );
+      }
+
+      final response = await apiClient.uploadFile(
+        ApiEndpoints.updateProfile,
+        formData: formData,
+      );
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return UserModel.fromJson(response.data['data']);
+      }
+      throw Exception(response.data['message'] ?? 'Failed to update profile');
+    } on DioException catch (e) {
+      throw Exception('Failed to update profile: ${e.message}');
+    }
+  }
 }

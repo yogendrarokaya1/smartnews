@@ -4,10 +4,10 @@ import 'package:smartnews/core/services/storage/user_session_service.dart';
 import 'package:smartnews/features/auth/data/datasources/auth_datasource.dart';
 import 'package:smartnews/features/auth/data/models/auth_hive_model.dart';
 
+// Create provider
 final authLocalDatasourceProvider = Provider<AuthLocalDatasource>((ref) {
-  final hiveService = ref.watch(hiveServiceProvider);
+  final hiveService = ref.read(hiveServiceProvider);
   final userSessionService = ref.read(userSessionServiceProvider);
-
   return AuthLocalDatasource(
     hiveService: hiveService,
     userSessionService: userSessionService,
@@ -25,25 +25,24 @@ class AuthLocalDatasource implements IAuthLocalDataSource {
        _userSessionService = userSessionService;
 
   @override
-  Future<AuthHiveModel> registerUser(AuthHiveModel user) async {
-    return await _hiveService.registerUser(user);
+  Future<AuthHiveModel> register(AuthHiveModel user) async {
+    return await _hiveService.register(user);
   }
 
   @override
-  Future<AuthHiveModel?> loginUser(String email, String password) async {
+  Future<AuthHiveModel?> login(String email, String password) async {
     try {
-      final user = _hiveService.loginUser(email, password);
-
+      final user = _hiveService.login(email, password);
       if (user != null && user.authId != null) {
+        // Save user session to SharedPreferences : Pachi app restart vayo vani pani user logged in rahos
         await _userSessionService.saveUserSession(
           userId: user.authId!,
-          email: user.email,
-          fullName: user.fullName,
+          email: user.email ?? '',
+          fullName: user.fullName ?? '',
           phoneNumber: user.phoneNumber,
-          role: user.role,
+          profilePicture: user.profilePicture,
         );
       }
-
       return user;
     } catch (e) {
       return null;
@@ -51,30 +50,33 @@ class AuthLocalDatasource implements IAuthLocalDataSource {
   }
 
   @override
-  Future<bool> logoutUser() async {
-    try {
-      await _userSessionService.clearSession();
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  @override
   Future<AuthHiveModel?> getCurrentUser() async {
     try {
+      // Check if user is logged in
       if (!_userSessionService.isLoggedIn()) {
         return null;
       }
 
+      // Get user ID from session
       final userId = _userSessionService.getCurrentUserId();
       if (userId == null) {
         return null;
       }
 
+      // Fetch user from Hive database
       return _hiveService.getUserById(userId);
     } catch (e) {
       return null;
+    }
+  }
+
+  @override
+  Future<bool> logout() async {
+    try {
+      await _userSessionService.clearSession();
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 

@@ -1,3 +1,5 @@
+import 'package:dartz/dartz.dart';
+import '../../../../core/error/failures.dart';
 import '../entities/user_entity.dart';
 import '../repositories/profile_repository.dart';
 
@@ -6,7 +8,7 @@ class GetProfileUseCase {
 
   GetProfileUseCase(this.repository);
 
-  Future<UserEntity> call() {
-    return repository.getProfile();
+  Future<Either<Failure, UserEntity>> call() {
+    return repository.getCurrentUser();
   }
 }

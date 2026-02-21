@@ -18,7 +18,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     HomeTab(),
     CategoriesTab(),
     BookmarksTab(),
-    ProfileTab(),
+    ProfileScreen(), // ← Added ProfileScreen here
   ];
 
   @override
@@ -26,11 +26,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Color(0xFF4A7CFF),
+        backgroundColor: const Color(0xFF4A7CFF),
 
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.black),
+            icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -52,7 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       TextSpan(
                         text: "Smart",
                         style: TextStyle(
-                          color: Color(0xFF0B2C4D), // Dark Blue
+                          color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -71,7 +71,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const Text(
                   "NEPAL",
                   style: TextStyle(
-                    color: Color(0xFF0B2C4D),
+                    color: Colors.white,
                     fontSize: 10,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w600,
@@ -85,7 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
             onPressed: () {
               // TODO: Notification screen
             },
@@ -100,24 +100,109 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             const DrawerHeader(
               decoration: BoxDecoration(color: Color(0xFF4A7CFF)),
-              child: Text(
-                "SmartNews Nepal",
-                style: TextStyle(color: Colors.white, fontSize: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.person,
+                      size: 40,
+                      color: Color(0xFF4A7CFF),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "SmartNews Nepal",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const ListTile(leading: Icon(Icons.home), title: Text("Home")),
-            const ListTile(
-              leading: Icon(Icons.category),
-              title: Text("Categories"),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text("Home"),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 0);
+              },
             ),
-            const ListTile(
-              leading: Icon(Icons.bookmark),
-              title: Text("Bookmarks"),
+            ListTile(
+              leading: const Icon(Icons.category),
+              title: const Text("Categories"),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 1);
+              },
             ),
-            const ListTile(leading: Icon(Icons.person), title: Text("Profile")),
+            ListTile(
+              leading: const Icon(Icons.bookmark),
+              title: const Text("Bookmarks"),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 2);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text("Profile"),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 3);
+              },
+            ),
             const Divider(),
-
-            // 🔴 LOGOUT
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text("Settings"),
+              onTap: () {
+                // TODO: Settings screen
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text("About"),
+              onTap: () {
+                // TODO: About screen
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text("Logout", style: TextStyle(color: Colors.red)),
+              onTap: () {
+                // TODO: Logout functionality
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Logout"),
+                    content: const Text("Are you sure you want to logout?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cancel"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // TODO: Call logout use case
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          "Logout",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -131,6 +216,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _currentIndex = index;
           });
         },
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: const Color(0xFF4A7CFF),
+        unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(
