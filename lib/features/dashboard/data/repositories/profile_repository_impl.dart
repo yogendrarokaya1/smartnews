@@ -1,28 +1,28 @@
 import 'dart:io';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/user_entity.dart';
-import '../../domain/repositories/profile_repository.dart';
-import '../datasources/remote/profile_remote_datasource.dart';
+import 'package:smartnews/core/error/failures.dart';
+import 'package:smartnews/features/dashboard/data/datasources/remote/profile_remote_datasource.dart';
+import 'package:smartnews/features/dashboard/data/datasources/remote/profile_remote_datasource_impl.dart';
+import 'package:smartnews/features/dashboard/domain/entities/user_entity.dart';
+import 'package:smartnews/features/dashboard/domain/repositories/profile_repository.dart';
 
-class ProfileRepositoryImpl implements ProfileRepository {
-  final ProfileRemoteDataSource remoteDataSource;
+final profileRepositoryProvider = Provider<IProfileRepository>((ref) {
+  final datasource = ref.read(profileRemoteDatasourceProvider);
+  return ProfileRepositoryImpl(datasource);
+});
 
-  ProfileRepositoryImpl({required this.remoteDataSource});
+class ProfileRepositoryImpl implements IProfileRepository {
+  final IProfileRemoteDatasource _datasource;
+
+  ProfileRepositoryImpl(this._datasource);
 
   @override
-  Future<Either<Failure, UserEntity>> getCurrentUser() async {
+  Future<Either<Failure, UserEntity>> getProfile() async {
     try {
-      final userModel = await remoteDataSource.getCurrentUser();
-      return Right(userModel.toEntity());
-    } on DioException catch (e) {
-      return Left(
-        ApiFailure(
-          message: e.message ?? 'Failed to fetch profile',
-          statusCode: e.response?.statusCode,
-        ),
-      );
+      final user = await _datasource.getProfile();
+      return Right(user);
     } catch (e) {
       return Left(ApiFailure(message: e.toString()));
     }
@@ -31,25 +31,18 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Either<Failure, UserEntity>> updateProfile({
     String? fullName,
-    String? email,
     String? phoneNumber,
-    File? profilePicture,
+    File? image,
+    String? password,
   }) async {
     try {
-      final userModel = await remoteDataSource.updateProfile(
+      final user = await _datasource.updateProfile(
         fullName: fullName,
-        email: email,
         phoneNumber: phoneNumber,
-        profilePicture: profilePicture,
+        image: image,
+        password: password,
       );
-      return Right(userModel.toEntity());
-    } on DioException catch (e) {
-      return Left(
-        ApiFailure(
-          message: e.message ?? 'Failed to update profile',
-          statusCode: e.response?.statusCode,
-        ),
-      );
+      return Right(user);
     } catch (e) {
       return Left(ApiFailure(message: e.toString()));
     }

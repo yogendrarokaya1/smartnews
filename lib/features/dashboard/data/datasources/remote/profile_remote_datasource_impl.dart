@@ -1,76 +1,66 @@
 import 'dart:io';
+
 import 'package:dio/dio.dart';
-import '../../../../../core/api/api_client.dart';
-import '../../../../../core/api/api_endpoints.dart';
-import '../../models/user_model.dart';
-import 'profile_remote_datasource.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smartnews/core/api/api_client.dart';
+import 'package:smartnews/core/api/api_endpoints.dart';
+import 'package:smartnews/features/dashboard/data/datasources/remote/profile_remote_datasource.dart';
+import 'package:smartnews/features/dashboard/data/models/user_model.dart';
+import 'package:smartnews/features/dashboard/domain/entities/user_entity.dart';
 
-class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
-  final ApiClient apiClient;
+final profileRemoteDatasourceProvider = Provider<IProfileRemoteDatasource>((
+  ref,
+) {
+  final apiClient = ref.read(apiClientProvider);
+  return ProfileRemoteDatasourceImpl(apiClient);
+});
 
-  ProfileRemoteDataSourceImpl({required this.apiClient});
+class ProfileRemoteDatasourceImpl implements IProfileRemoteDatasource {
+  final ApiClient _apiClient;
+
+  ProfileRemoteDatasourceImpl(this._apiClient);
 
   @override
-  Future<UserModel> getCurrentUser() async {
-    try {
-      final response = await apiClient.get(ApiEndpoints.whoAmI);
-
-      if (response.data['success'] == true) {
-        return UserModel.fromJson(response.data['data']);
-      }
-      throw Exception(
-        response.data['message'] ?? 'Failed to fetch user profile',
-      );
-    } on DioException catch (e) {
-      throw Exception('Failed to fetch profile: ${e.message}');
-    }
+  Future<UserEntity> getProfile() async {
+    final response = await _apiClient.get(ApiEndpoints.whoAmI);
+    final user = UserModel.fromJson(response.data['data']);
+    return user.toEntity();
   }
 
   @override
-  Future<UserModel> updateProfile({
+  Future<UserEntity> updateProfile({
     String? fullName,
-    String? email,
     String? phoneNumber,
-    File? profilePicture,
+    File? image,
+    String? password,
   }) async {
-    try {
-      FormData formData = FormData();
+    final formData = FormData();
 
-      // Add text fields
-      if (fullName != null) {
-        formData.fields.add(MapEntry('fullName', fullName));
-      }
-      if (email != null) {
-        formData.fields.add(MapEntry('email', email));
-      }
-      if (phoneNumber != null) {
-        formData.fields.add(MapEntry('phoneNumber', phoneNumber));
-      }
-
-      // Add profile picture if provided
-      if (profilePicture != null) {
-        formData.files.add(
-          MapEntry(
-            'profilePicture',
-            await MultipartFile.fromFile(
-              profilePicture.path,
-              filename: profilePicture.path.split('/').last,
-            ),
-          ),
-        );
-      }
-
-      final response = await apiClient.uploadFile(
-        ApiEndpoints.updateProfile,
-        formData: formData,
-      );
-
-      if (response.statusCode == 200 && response.data['success'] == true) {
-        return UserModel.fromJson(response.data['data']);
-      }
-      throw Exception(response.data['message'] ?? 'Failed to update profile');
-    } on DioException catch (e) {
-      throw Exception('Failed to update profile: ${e.message}');
+    if (fullName != null && fullName.isNotEmpty) {
+      formData.fields.add(MapEntry('fullName', fullName));
     }
+    if (phoneNumber != null && phoneNumber.isNotEmpty) {
+      formData.fields.add(MapEntry('phoneNumber', phoneNumber));
+    }
+    if (password != null && password.isNotEmpty) {
+      formData.fields.add(MapEntry('password', password));
+    }
+    if (image != null) {
+      final fileName = image.path.split('/').last;
+      formData.files.add(
+        MapEntry(
+          'image',
+          await MultipartFile.fromFile(image.path, filename: fileName),
+        ),
+      );
+    }
+
+    final response = await _apiClient.dio.put(
+      ApiEndpoints.updateProfile,
+      data: formData,
+    );
+
+    final user = UserModel.fromJson(response.data['data']);
+    return user.toEntity();
   }
 }

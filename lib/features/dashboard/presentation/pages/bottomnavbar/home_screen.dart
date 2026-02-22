@@ -1,101 +1,98 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smartnews/features/dashboard/presentation/view_model/news_view_model.dart';
+import 'package:smartnews/features/dashboard/domain/entities/news_entity.dart';
+// ignore: depend_on_referenced_packages
+import 'package:timeago/timeago.dart' as timeago;
 
-class HomeTab extends StatelessWidget {
+class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});
 
   @override
+  ConsumerState<HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends ConsumerState<HomeTab> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => ref.read(newsViewModelProvider.notifier).loadHomeData(),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 12),
+    final newsState = ref.watch(newsViewModelProvider);
 
-          // ================= RECENT NEWS =================
-          _sectionTitle("Recent News"),
-          _recentNewsCard(
-            imagePath: "assets/images/sportnews1.jpeg",
-            title: "Electronic voting in 12 hours, results in four hours",
-            date: "19th Nov 2021",
-          ),
-          _recentNewsCard(
-            imagePath: "assets/images/sportnews1.jpeg",
-            title: "Electronic voting in 12 hours, results in four hours",
-            date: "19th Nov 2021",
-          ),
+    if (newsState.status == NewsStatus.loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-          // ================= National Politics =================
-          _sectionTitle("National", seeMore: true),
-          _smallNewsCard(
-            imagePath: "assets/images/sportnews1.jpeg",
-            title:
-                "Police say 48 arrested for September violence had criminal past",
-          ),
-          _smallNewsCard(
-            imagePath: "assets/images/sportnews1.jpeg",
-            title:
-                "Police say 48 arrested for September violence had criminal past",
-          ),
-          _smallNewsCard(
-            imagePath: "assets/images/sportnews1.jpeg",
-            title:
-                "Police say 48 arrested for September violence had criminal past",
-          ),
+    if (newsState.status == NewsStatus.error) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 12),
+            Text(newsState.errorMessage ?? 'Something went wrong'),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () =>
+                  ref.read(newsViewModelProvider.notifier).loadHomeData(),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
 
-          // ================= SPORTS =================
-          _sectionTitle("Sports", seeMore: true),
-          _smallNewsCard(
-            imagePath: "assets/images/sportnews1.jpeg",
-            title: "Quatar Stadium Coming Along For Last Stretch",
-          ),
-          _smallNewsCard(
-            imagePath: "assets/images/sportnews1.jpeg",
-            title: "Preparation for Nepalgunj Marathon Completed",
-          ),
-          _smallNewsCard(
-            imagePath: "assets/images/sportnews1.jpeg",
-            title: "Netherlands Qualifies For World Cup",
-          ),
+    return RefreshIndicator(
+      onRefresh: () => ref.read(newsViewModelProvider.notifier).loadHomeData(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 12),
 
-          // ================= INTERNATIONAL =================
-          _sectionTitle("International", seeMore: true),
-          _smallNewsCard(
-            imagePath: "assets/images/sportnews1.jpeg",
-            title:
-                "Pakistan on the list of countries violating religious freedom ...",
-          ),
-          _smallNewsCard(
-            imagePath: "assets/images/sportnews1.jpeg",
-            title:
-                "Indian PM announces withdrawal of all three agricultural laws",
-          ),
-          _smallNewsCard(
-            imagePath: "assets/images/sportnews1.jpeg",
-            title: "5 killed in Sudan anti-military protests",
-          ),
+            // ── Recent / Latest News ──────────────────────────────────────
+            if (newsState.latestNews.isNotEmpty) ...[
+              _sectionTitle('Recent News'),
+              ...newsState.latestNews
+                  .take(3)
+                  .map((news) => _recentNewsCard(news)),
+            ],
 
-          // ================= TRENDING =================
-          _sectionTitle("Trending", seeMore: true),
-          _trendingNewsItem(
-            "Illegal television inaugurated by the Prime Minister",
-          ),
-          _trendingNewsItem(
-            "That report of Fewatal hidden for almost 32 years",
-          ),
-          _trendingNewsItem("Cantilever Bridge: Not for walking, just to see"),
+            // ── Category Sections ─────────────────────────────────────────
+            ...newsState.categoryPreviews.entries.map((entry) {
+              final category = entry.key;
+              final articles = entry.value;
+              if (articles.isEmpty) return const SizedBox.shrink();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _sectionTitle(
+                    _capitalize(category),
+                    seeMore: true,
+                    category: category,
+                  ),
+                  ...articles.take(3).map((news) => _smallNewsCard(news)),
+                ],
+              );
+            }),
 
-          // ================= VIDEOS =================
-          _sectionTitle("Videos"),
-          _videoCard(imagePath: "assets/images/sportnews1.jpeg"),
-
-          const SizedBox(height: 16),
-        ],
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
 
-  // ================= SECTION TITLE =================
-  Widget _sectionTitle(String title, {bool seeMore = false}) {
+  // ─── Section Title ────────────────────────────────────────────────────────
+
+  Widget _sectionTitle(String title, {bool seeMore = false, String? category}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -106,29 +103,40 @@ class HomeTab extends StatelessWidget {
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           if (seeMore)
-            const Text("See More", style: TextStyle(color: Colors.blue)),
+            GestureDetector(
+              onTap: () {
+                // TODO: Navigate to full category list
+              },
+              child: const Text(
+                'See More',
+                style: TextStyle(color: Colors.blue),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  // ================= RECENT NEWS CARD =================
-  Widget _recentNewsCard({
-    required String imagePath,
-    required String title,
-    required String date,
-  }) {
+  // ─── Recent News Card (large) ─────────────────────────────────────────────
+
+  Widget _recentNewsCard(NewsEntity news) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        // TODO: Navigate to news detail
+      },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         height: 200,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          image: DecorationImage(
-            image: AssetImage(imagePath),
-            fit: BoxFit.cover,
-          ),
+          color: Colors.grey.shade300,
+          image: news.thumbnail != null && news.thumbnail!.isNotEmpty
+              ? DecorationImage(
+                  image: NetworkImage(news.thumbnail!),
+                  fit: BoxFit.cover,
+                  onError: (_, __) {},
+                )
+              : null,
         ),
         child: Container(
           decoration: BoxDecoration(
@@ -144,8 +152,21 @@ class HomeTab extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Category badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4A7CFF),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  _capitalize(news.category),
+                  style: const TextStyle(color: Colors.white, fontSize: 10),
+                ),
+              ),
+              const SizedBox(height: 6),
               Text(
-                title.toUpperCase(),
+                news.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -154,11 +175,12 @@ class HomeTab extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(
-                date,
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
-              ),
+              const SizedBox(height: 4),
+              if (news.publishedAt != null)
+                Text(
+                  timeago.format(news.publishedAt!),
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
             ],
           ),
         ),
@@ -166,42 +188,75 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  // ================= SMALL NEWS CARD =================
-  Widget _smallNewsCard({required String imagePath, required String title}) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.asset(imagePath, width: 90, height: 60, fit: BoxFit.cover),
+  // ─── Small News Card ──────────────────────────────────────────────────────
+
+  Widget _smallNewsCard(NewsEntity news) {
+    return GestureDetector(
+      onTap: () {
+        // TODO: Navigate to news detail
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Thumbnail
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: news.thumbnail != null && news.thumbnail!.isNotEmpty
+                  ? Image.network(
+                      news.thumbnail!,
+                      width: 90,
+                      height: 65,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _placeholderImage(),
+                    )
+                  : _placeholderImage(),
+            ),
+            const SizedBox(width: 12),
+            // Text
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    news.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  if (news.publishedAt != null)
+                    Text(
+                      timeago.format(news.publishedAt!),
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-      ),
-      onTap: () {},
     );
   }
 
-  // ================= TRENDING ITEM =================
-  Widget _trendingNewsItem(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Text(title, style: const TextStyle(fontSize: 14)),
-    );
-  }
-
-  // ================= VIDEO CARD =================
-  Widget _videoCard({required String imagePath}) {
+  Widget _placeholderImage() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      height: 200,
+      width: 90,
+      height: 65,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        image: DecorationImage(image: AssetImage(imagePath), fit: BoxFit.cover),
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: const Center(
-        child: Icon(Icons.play_circle_outline, color: Colors.white, size: 60),
-      ),
+      child: const Icon(Icons.image_outlined, color: Colors.grey, size: 28),
     );
+  }
+
+  String _capitalize(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
   }
 }

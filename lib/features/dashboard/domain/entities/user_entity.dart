@@ -1,42 +1,47 @@
 import 'package:equatable/equatable.dart';
 
 class UserEntity extends Equatable {
-  final String id;
-  final String email;
-  final String phoneNumber;
+  final String? userId;
   final String fullName;
-  final String role;
+  final String email;
+  final String? phoneNumber;
   final String? profilePicture;
-  final DateTime createdAt;
+  final String? role;
 
   const UserEntity({
-    required this.id,
-    required this.email,
-    required this.phoneNumber,
+    this.userId,
     required this.fullName,
-    required this.role,
+    required this.email,
+    this.phoneNumber,
     this.profilePicture,
-    required this.createdAt,
+    this.role,
   });
 
-  bool get isAdmin => role == 'admin';
-
-  String get initials {
-    final names = fullName.split(' ');
-    if (names.length >= 2) {
-      return '${names[0][0]}${names[1][0]}'.toUpperCase();
-    }
-    return fullName.isNotEmpty ? fullName[0].toUpperCase() : 'U';
+  UserEntity copyWith({
+    String? userId,
+    String? fullName,
+    String? email,
+    String? phoneNumber,
+    String? profilePicture,
+    String? role,
+  }) {
+    return UserEntity(
+      userId: userId ?? this.userId,
+      fullName: fullName ?? this.fullName,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      profilePicture: profilePicture ?? this.profilePicture,
+      role: role ?? this.role,
+    );
   }
 
   @override
   List<Object?> get props => [
-    id,
+    userId,
+    fullName,
     email,
     phoneNumber,
-    fullName,
-    role,
     profilePicture,
-    createdAt,
+    role,
   ];
 }

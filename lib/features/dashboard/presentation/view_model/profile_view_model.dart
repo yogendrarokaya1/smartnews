@@ -1,74 +1,67 @@
 import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:smartnews/features/dashboard/domain/usecases/profile_usecase.dart';
+import 'package:smartnews/features/dashboard/domain/usecases/update_profile_usecase.dart';
 import 'package:smartnews/features/dashboard/presentation/view_model/profile_state.dart';
-import '../../domain/usecases/profile_usecase.dart';
-import '../../domain/usecases/update_profile_usecase.dart';
 
-class ProfileViewModel extends StateNotifier<ProfileState> {
-  final GetProfileUseCase _getProfileUseCase;
-  final UpdateProfileUseCase _updateProfileUseCase;
+final profileViewModelProvider =
+    NotifierProvider<ProfileViewModel, ProfileState>(ProfileViewModel.new);
 
-  ProfileViewModel({
-    required GetProfileUseCase getProfileUseCase,
-    required UpdateProfileUseCase updateProfileUseCase,
-  }) : _getProfileUseCase = getProfileUseCase,
-       _updateProfileUseCase = updateProfileUseCase,
-       super(const ProfileState());
+class ProfileViewModel extends Notifier<ProfileState> {
+  late final ProfileUsecase _profileUsecase;
+  late final UpdateProfileUsecase _updateProfileUsecase;
 
-  // Load user profile
-  Future<void> loadProfile() async {
-    state = state.copyWith(isLoading: true, error: null);
+  @override
+  ProfileState build() {
+    _profileUsecase = ref.read(profileUsecaseProvider);
+    _updateProfileUsecase = ref.read(updateProfileUsecaseProvider);
+    return const ProfileState();
+  }
 
-    final result = await _getProfileUseCase();
+  Future<void> getProfile() async {
+    state = state.copyWith(status: ProfileStatus.loading);
+
+    final result = await _profileUsecase();
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(isLoading: false, error: failure.message),
+      (failure) => state = state.copyWith(
+        status: ProfileStatus.error,
+        errorMessage: failure.message,
+      ),
       (user) =>
-          state = state.copyWith(isLoading: false, user: user, error: null),
+          state = state.copyWith(status: ProfileStatus.loaded, user: user),
     );
   }
 
-  // Update user profile
-  Future<bool> updateProfile({
+  Future<void> updateProfile({
     String? fullName,
-    String? email,
     String? phoneNumber,
-    File? profilePicture,
+    File? image,
+    String? password,
   }) async {
-    state = state.copyWith(isUpdating: true, updateMessage: null);
+    state = state.copyWith(status: ProfileStatus.updating);
 
-    final params = UpdateProfileParams(
-      fullName: fullName,
-      email: email,
-      phoneNumber: phoneNumber,
-      profilePicture: profilePicture,
+    final result = await _updateProfileUsecase(
+      UpdateProfileParams(
+        fullName: fullName,
+        phoneNumber: phoneNumber,
+        image: image,
+        password: password,
+      ),
     );
 
-    final result = await _updateProfileUseCase(params);
-
-    return result.fold(
-      (failure) {
-        state = state.copyWith(
-          isUpdating: false,
-          updateMessage: failure.message,
-        );
-        return false;
-      },
-      (user) {
-        state = state.copyWith(
-          isUpdating: false,
-          user: user,
-          updateMessage: 'Profile updated successfully',
-        );
-        return true;
-      },
+    result.fold(
+      (failure) => state = state.copyWith(
+        status: ProfileStatus.error,
+        errorMessage: failure.message,
+      ),
+      (user) =>
+          state = state.copyWith(status: ProfileStatus.updated, user: user),
     );
   }
 
-  // Clear update message
-  void clearUpdateMessage() {
-    state = state.copyWith(updateMessage: null);
+  void clearError() {
+    state = state.copyWith(errorMessage: null);
   }
 }

@@ -1,25 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smartnews/features/auth/presentation/view_model/auth_viewmodel.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/bookmark_screen.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/categories_screen.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/home_screen.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/profile_screen.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = const [
     HomeTab(),
     CategoriesTab(),
     BookmarksTab(),
-    ProfileScreen(), // ← Added ProfileScreen here
+    ProfileScreen(),
   ];
+
+  void _confirmLogout() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(authViewModelProvider.notifier).logout();
+            },
+            child: const Text('Logout', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,22 +53,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: const Color(0xFF4A7CFF),
-
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 🔹 LOGO
             Image.asset('assets/images/logo.png', height: 36),
             const SizedBox(width: 8),
-
-            // 🔹 TITLE TEXT (MATCH LOGO)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -60,7 +81,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       TextSpan(
                         text: "News",
                         style: TextStyle(
-                          color: Color(0xFFF57C00), // Orange
+                          color: Color(0xFFF57C00),
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -82,13 +103,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
         centerTitle: true,
-
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () {
-              // TODO: Notification screen
-            },
+            onPressed: () {},
           ),
           const SizedBox(width: 8),
         ],
@@ -161,46 +179,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text("Settings"),
-              onTap: () {
-                // TODO: Settings screen
-              },
+              onTap: () {},
             ),
             ListTile(
               leading: const Icon(Icons.info_outline),
               title: const Text("About"),
-              onTap: () {
-                // TODO: About screen
-              },
+              onTap: () {},
             ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
               title: const Text("Logout", style: TextStyle(color: Colors.red)),
               onTap: () {
-                // TODO: Logout functionality
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Logout"),
-                    content: const Text("Are you sure you want to logout?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Cancel"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          // TODO: Call logout use case
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          "Logout",
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                Navigator.pop(context); // close drawer first
+                _confirmLogout();
               },
             ),
           ],
@@ -211,11 +203,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        onTap: (index) => setState(() => _currentIndex = index),
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF4A7CFF),
         unselectedItemColor: Colors.grey,
