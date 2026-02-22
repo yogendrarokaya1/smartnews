@@ -1,12 +1,12 @@
 import 'dart:io';
-import '../../models/user_model.dart';
+import 'package:smartnews/features/dashboard/domain/entities/user_entity.dart';
 
-abstract class ProfileRemoteDataSource {
-  Future<UserModel> getCurrentUser();
-  Future<UserModel> updateProfile({
+abstract class IProfileRemoteDatasource {
+  Future<UserEntity> getProfile();
+  Future<UserEntity> updateProfile({
     String? fullName,
-    String? email,
     String? phoneNumber,
-    File? profilePicture,
+    File? image,
+    String? password,
   });
 }

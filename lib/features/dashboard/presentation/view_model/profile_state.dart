@@ -1,43 +1,30 @@
-import 'package:equatable/equatable.dart';
-import '../../domain/entities/user_entity.dart';
+import 'package:smartnews/features/dashboard/domain/entities/user_entity.dart';
 
-class ProfileState extends Equatable {
-  final bool isLoading;
+enum ProfileStatus { initial, loading, loaded, updating, updated, error }
+
+class ProfileState {
+  final ProfileStatus status;
   final UserEntity? user;
-  final String? error;
-  final bool isUpdating;
-  final String? updateMessage;
+  final String? errorMessage;
 
   const ProfileState({
-    this.isLoading = false,
+    this.status = ProfileStatus.initial,
     this.user,
-    this.error,
-    this.isUpdating = false,
-    this.updateMessage,
+    this.errorMessage,
   });
 
   ProfileState copyWith({
-    bool? isLoading,
+    ProfileStatus? status,
     UserEntity? user,
-    String? error,
-    bool? isUpdating,
-    String? updateMessage,
+    String? errorMessage,
   }) {
     return ProfileState(
-      isLoading: isLoading ?? this.isLoading,
+      status: status ?? this.status,
       user: user ?? this.user,
-      error: error,
-      isUpdating: isUpdating ?? this.isUpdating,
-      updateMessage: updateMessage,
+      errorMessage: errorMessage,
     );
   }
 
-  @override
-  List<Object?> get props => [
-    isLoading,
-    user,
-    error,
-    isUpdating,
-    updateMessage,
-  ];
+  bool get isLoading =>
+      status == ProfileStatus.loading || status == ProfileStatus.updating;
 }

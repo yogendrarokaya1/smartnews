@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_smart_retry/dio_smart_retry.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:smartnews/core/api/api_endpoints.dart';
 
@@ -41,7 +41,6 @@ class ApiClient {
           Duration(seconds: 3),
         ],
         retryEvaluator: (error, attempt) {
-          // Retry on connection errors and timeouts, not on 4xx/5xx
           return error.type == DioExceptionType.connectionTimeout ||
               error.type == DioExceptionType.sendTimeout ||
               error.type == DioExceptionType.receiveTimeout ||
@@ -67,7 +66,6 @@ class ApiClient {
 
   Dio get dio => _dio;
 
-  // GET request
   Future<Response> get(
     String path, {
     Map<String, dynamic>? queryParameters,
@@ -76,7 +74,6 @@ class ApiClient {
     return _dio.get(path, queryParameters: queryParameters, options: options);
   }
 
-  // POST request
   Future<Response> post(
     String path, {
     dynamic data,
@@ -91,7 +88,6 @@ class ApiClient {
     );
   }
 
-  // PUT request
   Future<Response> put(
     String path, {
     dynamic data,
@@ -106,7 +102,6 @@ class ApiClient {
     );
   }
 
-  // DELETE request
   Future<Response> delete(
     String path, {
     dynamic data,
@@ -121,7 +116,6 @@ class ApiClient {
     );
   }
 
-  // Multipart request for file uploads
   Future<Response> uploadFile(
     String path, {
     required FormData formData,
@@ -139,27 +133,23 @@ class ApiClient {
 
 // Auth Interceptor to add JWT token to requests
 class _AuthInterceptor extends Interceptor {
-  final _storage = const FlutterSecureStorage();
   static const String _tokenKey = 'auth_token';
+
+  // Only these paths skip token injection
+  static const _publicPaths = [ApiEndpoints.login, ApiEndpoints.register];
 
   @override
   void onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Skip auth for public endpoints
-    final publicEndpoints = [ApiEndpoints.login, ApiEndpoints.register];
+    final isPublic = _publicPaths.any(
+      (path) => options.path == path || options.path.startsWith(path),
+    );
 
-    final isPublicGet =
-        options.method == 'GET' &&
-        publicEndpoints.any((endpoint) => options.path.startsWith(endpoint));
-
-    final isAuthEndpoint =
-        options.path == ApiEndpoints.login ||
-        options.path == ApiEndpoints.register;
-
-    if (!isPublicGet && !isAuthEndpoint) {
-      final token = await _storage.read(key: _tokenKey);
+    if (!isPublic) {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString(_tokenKey);
       if (token != null) {
         options.headers['Authorization'] = 'Bearer $token';
       }
@@ -170,11 +160,8 @@ class _AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    // Handle 401 Unauthorized - token expired
     if (err.response?.statusCode == 401) {
-      // Clear token and redirect to login
-      _storage.delete(key: _tokenKey);
-      // You can add navigation logic here or use a callback
+      SharedPreferences.getInstance().then((prefs) => prefs.remove(_tokenKey));
     }
     handler.next(err);
   }

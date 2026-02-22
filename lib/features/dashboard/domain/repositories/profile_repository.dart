@@ -1,15 +1,15 @@
 import 'dart:io';
+
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../entities/user_entity.dart';
+import 'package:smartnews/core/error/failures.dart';
+import 'package:smartnews/features/dashboard/domain/entities/user_entity.dart';
 
-abstract class ProfileRepository {
-  Future<Either<Failure, UserEntity>> getCurrentUser();
-
+abstract class IProfileRepository {
+  Future<Either<Failure, UserEntity>> getProfile();
   Future<Either<Failure, UserEntity>> updateProfile({
     String? fullName,
-    String? email,
     String? phoneNumber,
-    File? profilePicture,
+    File? image,
+    String? password,
   });
 }

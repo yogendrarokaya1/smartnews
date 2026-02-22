@@ -1,59 +1,59 @@
-import '../../domain/entities/user_entity.dart';
+import 'package:smartnews/features/dashboard/domain/entities/user_entity.dart';
 
 class UserModel {
-  final String id;
-  final String email;
-  final String phoneNumber;
+  final String? id;
   final String fullName;
-  final String role;
+  final String email;
+  final String? phoneNumber;
   final String? profilePicture;
-  final DateTime createdAt;
+  final String? role;
 
   UserModel({
-    required this.id,
-    required this.email,
-    required this.phoneNumber,
+    this.id,
     required this.fullName,
-    required this.role,
+    required this.email,
+    this.phoneNumber,
     this.profilePicture,
-    required this.createdAt,
+    this.role,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['_id'] ?? '',
-      email: json['email'] ?? '',
-      phoneNumber: json['phoneNumber'] ?? '',
+      id: json['_id'],
       fullName: json['fullName'] ?? '',
-      role: json['role'] ?? 'user',
-      profilePicture: json['profilePicture'],
-      createdAt: DateTime.parse(
-        json['createdAt'] ?? DateTime.now().toIso8601String(),
-      ),
+      email: json['email'] ?? '',
+      phoneNumber: json['phoneNumber'],
+      profilePicture: json['imageUrl'],
+      role: json['role'],
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      '_id': id,
-      'email': email,
-      'phoneNumber': phoneNumber,
-      'fullName': fullName,
-      'role': role,
-      'profilePicture': profilePicture,
-      'createdAt': createdAt.toIso8601String(),
-    };
+    final data = <String, dynamic>{};
+    if (fullName.isNotEmpty) data['fullName'] = fullName;
+    if (phoneNumber != null) data['phoneNumber'] = phoneNumber;
+    return data;
   }
 
   UserEntity toEntity() {
     return UserEntity(
-      id: id,
+      userId: id,
+      fullName: fullName,
       email: email,
       phoneNumber: phoneNumber,
-      fullName: fullName,
-      role: role,
       profilePicture: profilePicture,
-      createdAt: createdAt,
+      role: role,
+    );
+  }
+
+  factory UserModel.fromEntity(UserEntity entity) {
+    return UserModel(
+      id: entity.userId,
+      fullName: entity.fullName,
+      email: entity.email,
+      phoneNumber: entity.phoneNumber,
+      profilePicture: entity.profilePicture,
+      role: entity.role,
     );
   }
 }
