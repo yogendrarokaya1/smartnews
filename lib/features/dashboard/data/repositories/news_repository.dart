@@ -9,6 +9,7 @@ import 'package:smartnews/features/dashboard/domain/entities/news_entity.dart';
 abstract class INewsRepository {
   Future<Either<Failure, List<NewsEntity>>> getLandingNews();
   Future<Either<Failure, Map<String, List<NewsEntity>>>> getCategoryPreviews();
+  Future<Either<Failure, NewsEntity>> getNewsBySlug(String slug);
   Future<Either<Failure, List<NewsEntity>>> getPublishedNews({
     int page,
     int limit,
@@ -46,6 +47,16 @@ class NewsRepositoryImpl implements INewsRepository {
     try {
       final data = await _datasource.getCategoryPreviews();
       return Right(data);
+    } catch (e) {
+      return Left(ApiFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, NewsEntity>> getNewsBySlug(String slug) async {
+    try {
+      final news = await _datasource.getNewsBySlug(slug);
+      return Right(news);
     } catch (e) {
       return Left(ApiFailure(message: e.toString()));
     }

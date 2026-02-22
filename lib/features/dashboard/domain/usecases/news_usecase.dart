@@ -40,7 +40,21 @@ class GetCategoryPreviewsUsecase
   }
 }
 
-// ─── Get Published News (with params) ────────────────────────────────────────
+// ─── Get News By Slug ─────────────────────────────────────────────────────────
+
+final getNewsBySlugUsecaseProvider = Provider<GetNewsBySlugUsecase>((ref) {
+  return GetNewsBySlugUsecase(ref.read(newsRepositoryProvider));
+});
+
+class GetNewsBySlugUsecase implements UsecaseWithParms<NewsEntity, String> {
+  final INewsRepository _repository;
+  GetNewsBySlugUsecase(this._repository);
+
+  @override
+  Future<Either<Failure, NewsEntity>> call(String slug) {
+    return _repository.getNewsBySlug(slug);
+  }
+}
 
 final getPublishedNewsUsecaseProvider = Provider<GetPublishedNewsUsecase>((
   ref,

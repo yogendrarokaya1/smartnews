@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smartnews/features/dashboard/presentation/view_model/news_view_model.dart';
 import 'package:smartnews/features/dashboard/domain/entities/news_entity.dart';
-// ignore: depend_on_referenced_packages
-import 'package:timeago/timeago.dart' as timeago;
+import 'package:smartnews/features/dashboard/presentation/pages/category_news_screen.dart';
+import 'package:smartnews/features/dashboard/presentation/pages/news_detail_screen.dart';
+import 'package:smartnews/features/dashboard/presentation/view_model/news_view_model.dart';
 
 class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});
@@ -102,10 +102,15 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             title,
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          if (seeMore)
+          if (seeMore && category != null)
             GestureDetector(
               onTap: () {
-                // TODO: Navigate to full category list
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CategoryNewsScreen(category: category),
+                  ),
+                );
               },
               child: const Text(
                 'See More',
@@ -121,9 +126,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
   Widget _recentNewsCard(NewsEntity news) {
     return GestureDetector(
-      onTap: () {
-        // TODO: Navigate to news detail
-      },
+      onTap: () => _openDetail(news),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         height: 200,
@@ -152,7 +155,6 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Category badge
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
@@ -178,7 +180,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               const SizedBox(height: 4),
               if (news.publishedAt != null)
                 Text(
-                  timeago.format(news.publishedAt!),
+                  _timeAgo(news.publishedAt!),
                   style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
             ],
@@ -192,15 +194,12 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
   Widget _smallNewsCard(NewsEntity news) {
     return GestureDetector(
-      onTap: () {
-        // TODO: Navigate to news detail
-      },
+      onTap: () => _openDetail(news),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Thumbnail
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: news.thumbnail != null && news.thumbnail!.isNotEmpty
@@ -214,7 +213,6 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   : _placeholderImage(),
             ),
             const SizedBox(width: 12),
-            // Text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,7 +229,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   const SizedBox(height: 4),
                   if (news.publishedAt != null)
                     Text(
-                      timeago.format(news.publishedAt!),
+                      _timeAgo(news.publishedAt!),
                       style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                 ],
@@ -239,6 +237,17 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  void _openDetail(NewsEntity news) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => NewsDetailScreen(slug: news.slug, preloadedNews: news),
       ),
     );
   }
@@ -258,5 +267,16 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   String _capitalize(String text) {
     if (text.isEmpty) return text;
     return text[0].toUpperCase() + text.substring(1);
+  }
+
+  String _timeAgo(DateTime date) {
+    final diff = DateTime.now().difference(date);
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    if (diff.inDays < 30) return '${(diff.inDays / 7).floor()}w ago';
+    if (diff.inDays < 365) return '${(diff.inDays / 30).floor()}mo ago';
+    return '${(diff.inDays / 365).floor()}y ago';
   }
 }

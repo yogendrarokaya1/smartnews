@@ -205,8 +205,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF4A7CFF),
-        unselectedItemColor: Colors.grey,
+        backgroundColor: const Color(0xFF0B2C4D),
+        selectedItemColor: Colors.red,
+        unselectedItemColor: Colors.white,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(

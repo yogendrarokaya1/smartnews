@@ -9,6 +9,7 @@ import 'package:smartnews/features/dashboard/domain/entities/news_entity.dart';
 abstract class INewsRemoteDatasource {
   Future<List<NewsEntity>> getLandingNews();
   Future<Map<String, List<NewsEntity>>> getCategoryPreviews();
+  Future<NewsEntity> getNewsBySlug(String slug);
   Future<List<NewsEntity>> getPublishedNews({
     int page,
     int limit,
@@ -49,6 +50,12 @@ class NewsRemoteDatasourceImpl implements INewsRemoteDatasource {
           .toList();
       return MapEntry(category, list);
     });
+  }
+
+  @override
+  Future<NewsEntity> getNewsBySlug(String slug) async {
+    final response = await _apiClient.get(ApiEndpoints.newsBySlug(slug));
+    return NewsModel.fromJson(response.data['data']).toEntity();
   }
 
   @override

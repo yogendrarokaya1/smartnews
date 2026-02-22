@@ -62,7 +62,7 @@ dependencies:
   equatable: ^2.0.7
   dartz: ^0.10.1
 
-
+  share_plus: ^9.0.0
   timeago: ^3.6.1
 
 dev_dependencies:
