@@ -1,8 +1,24 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+
 class ApiEndpoints {
-  // Base URL - CHANGE THIS TO YOUR BACKEND URL
-  static const String baseUrl = 'http://10.0.2.2:5000'; // Android emulator
-  // static const String baseUrl = 'http://localhost:5000'; // iOS simulator
-  // static const String baseUrl = 'https://your-api.com'; // Production
+  ApiEndpoints._();
+
+  // ── Change these two when switching devices ────────────────────────────────
+  static const bool isPhysicalDevice =
+      true; // true = real phone, false = emulator
+  static const String _ipAddress = '192.168.1.67'; // your PC's WiFi IP
+  static const int _port = 5000;
+
+  // ── Auto-detects correct host ──────────────────────────────────────────────
+  static String get _host {
+    if (isPhysicalDevice) return _ipAddress;
+    if (kIsWeb || Platform.isIOS) return 'localhost';
+    if (Platform.isAndroid) return '10.0.2.2';
+    return 'localhost';
+  }
+
+  static String get baseUrl => 'http://$_host:$_port';
 
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);
@@ -33,30 +49,34 @@ class ApiEndpoints {
   static String videoBySlug(String slug) => '/api/videos/slug/$slug';
 
   // ══════════════════════════════════════════════════════════════════════════
+  // BOOKMARK ENDPOINTS
+  // ══════════════════════════════════════════════════════════════════════════
+  static const String bookmarks = '/api/bookmarks';
+  static String addBookmark(String newsId) => '/api/bookmarks/$newsId';
+  static String removeBookmark(String newsId) => '/api/bookmarks/$newsId';
+  static String bookmarkStatus(String newsId) =>
+      '/api/bookmarks/$newsId/status';
+
+  // ══════════════════════════════════════════════════════════════════════════
   // HELPER METHODS
   // ══════════════════════════════════════════════════════════════════════════
 
-  // Get full URL
   static String getUrl(String endpoint) => '$baseUrl$endpoint';
 
-  // Get image URL
   static String getImageUrl(String? path) {
     if (path == null || path.isEmpty) return '';
     if (path.startsWith('http')) return path;
     return '$baseUrl$path';
   }
 
-  // Get YouTube thumbnail
   static String getYouTubeThumbnail(String videoUrl) {
     String? videoId;
-
     if (videoUrl.contains('youtube.com')) {
       final uri = Uri.parse(videoUrl);
       videoId = uri.queryParameters['v'];
     } else if (videoUrl.contains('youtu.be')) {
       videoId = videoUrl.split('/').last.split('?').first;
     }
-
     if (videoId != null) {
       return 'https://img.youtube.com/vi/$videoId/maxresdefault.jpg';
     }

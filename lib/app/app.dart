@@ -4,10 +4,8 @@ import 'package:smartnews/app/theme/app_theme.dart';
 import 'package:smartnews/features/auth/presentation/pages/login_page.dart';
 import 'package:smartnews/features/auth/presentation/state/auth_state.dart';
 import 'package:smartnews/features/auth/presentation/view_model/auth_viewmodel.dart';
-import 'package:smartnews/features/dashboard/presentation/pages/dashboar_screen.dart';
 import 'package:smartnews/features/splash/presentation/pages/splash_screen.dart';
 
-// Global navigator key to allow navigation from anywhere
 final navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends ConsumerWidget {
@@ -15,16 +13,14 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Listen to auth state changes and navigate accordingly
     ref.listen(authViewModelProvider, (previous, next) {
+      // previous == null means it's the initial build — let splash handle it
+      if (previous == null) return;
+
       if (next.status == AuthStatus.unauthenticated) {
+        // Only fires on RUNTIME logout, not app start
         navigatorKey.currentState?.pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const LoginPage()),
-          (route) => false, // remove ALL previous routes
-        );
-      } else if (next.status == AuthStatus.authenticated) {
-        navigatorKey.currentState?.pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const DashboardScreen()),
           (route) => false,
         );
       }
@@ -35,7 +31,7 @@ class MyApp extends ConsumerWidget {
       title: 'SmartNews Nepal',
       theme: AppTheme.lightTheme,
       navigatorKey: navigatorKey,
-      home: const SplashScreen(),
+      home: const SplashScreen(), // splash is always the entry point
     );
   }
 }

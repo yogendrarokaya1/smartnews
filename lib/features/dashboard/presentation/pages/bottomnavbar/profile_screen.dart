@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:smartnews/core/api/api_endpoints.dart';
 import 'package:smartnews/features/auth/presentation/view_model/auth_viewmodel.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/bottomnavbar/edit_profile_screen.dart';
@@ -14,13 +16,83 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  // ── GPS Location ───────────────────────────────────────────────────────────
+  String? _locationText;
+  bool _loadingLocation = false;
+
   @override
   void initState() {
     super.initState();
-    // Load profile when screen opens
     Future.microtask(
       () => ref.read(profileViewModelProvider.notifier).getProfile(),
     );
+    _fetchLocation();
+  }
+
+  Future<void> _fetchLocation() async {
+    setState(() => _loadingLocation = true);
+
+    try {
+      // Check if location services enabled
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() {
+          _locationText = 'Location services disabled';
+          _loadingLocation = false;
+        });
+        return;
+      }
+
+      // Check / request permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            _locationText = 'Location permission denied';
+            _loadingLocation = false;
+          });
+          return;
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _locationText = 'Location permission permanently denied';
+          _loadingLocation = false;
+        });
+        return;
+      }
+
+      // Get position
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+      );
+
+      // Reverse geocode → city name
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+        final parts = [
+          place.subLocality,
+          place.locality,
+          place.administrativeArea,
+        ].where((p) => p != null && p.isNotEmpty).toList();
+
+        setState(() {
+          _locationText = parts.join(', ');
+          _loadingLocation = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _locationText = 'Could not fetch location';
+        _loadingLocation = false;
+      });
+    }
   }
 
   @override
@@ -65,7 +137,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return CustomScrollView(
       slivers: [
         SliverAppBar(
-          expandedHeight: 220,
+          expandedHeight: 260,
           pinned: true,
           flexibleSpace: FlexibleSpaceBar(
             background: Container(
@@ -131,6 +203,48 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                       ),
                     ),
+
+                  // ── GPS Location display ─────────────────────────────────
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.location_on,
+                        color: Colors.white70,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                      _loadingLocation
+                          ? const SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white70,
+                              ),
+                            )
+                          : Text(
+                              _locationText ?? 'Fetching location...',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                              ),
+                            ),
+                      if (!_loadingLocation && _locationText != null)
+                        GestureDetector(
+                          onTap: _fetchLocation,
+                          child: const Padding(
+                            padding: EdgeInsets.only(left: 6),
+                            child: Icon(
+                              Icons.refresh,
+                              color: Colors.white54,
+                              size: 14,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -171,6 +285,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     icon: Icons.phone_outlined,
                     label: 'Phone',
                     value: user.phoneNumber ?? 'Not provided',
+                  ),
+                  _actionTile(
+                    context,
+                    icon: Icons.location_on_outlined,
+                    label: 'Current Location',
+                    subtitle: _loadingLocation
+                        ? 'Detecting...'
+                        : (_locationText ?? 'Tap to enable location'),
+                    onTap: () async {
+                      await Geolocator.openLocationSettings();
+                      // Re-fetch after user returns from settings
+                      _fetchLocation();
+                    },
                   ),
                 ]),
                 const SizedBox(height: 24),
@@ -248,6 +375,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     required String label,
     required VoidCallback onTap,
     Color? color,
+    String? subtitle,
   }) {
     return ListTile(
       leading: Icon(icon, size: 22, color: color),
@@ -259,6 +387,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           fontWeight: FontWeight.w500,
         ),
       ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            )
+          : null,
       trailing: const Icon(Icons.chevron_right, size: 20),
       onTap: onTap,
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smartnews/features/auth/presentation/pages/login_page.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -34,6 +35,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
+  Future<void> _completeOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_done', true); // ← mark as done
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,9 +66,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset(
-                        'assets/images/logo.png', // your image path
-                        width: 100, // set width
-                        height: 100, // set height
+                        'assets/images/logo.png',
+                        width: 100,
+                        height: 100,
                       ),
                       const SizedBox(height: 30),
                       Text(
@@ -101,9 +112,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Back button
                 Visibility(
-                  visible: currentIndex > 0, // hide on first page
+                  visible: currentIndex > 0,
                   child: ElevatedButton(
                     onPressed: () {
                       _controller.previousPage(
@@ -114,7 +124,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: const Text("Back"),
                   ),
                 ),
-                // Next / Get Started button
                 ElevatedButton(
                   onPressed: () {
                     if (currentIndex < onboardingData.length - 1) {
@@ -123,10 +132,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         curve: Curves.easeIn,
                       );
                     } else {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginPage()),
-                      );
+                      _completeOnboarding(); // ← saves flag + navigates
                     }
                   },
                   child: Text(

@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smartnews/core/error/failures.dart';
 import 'package:smartnews/core/services/connectivity/network_info.dart';
 import 'package:smartnews/features/auth/data/datasources/auth_datasource.dart';
@@ -11,7 +12,6 @@ import 'package:smartnews/features/auth/data/models/auth_hive_model.dart';
 import 'package:smartnews/features/auth/domain/entities/auth_entity.dart';
 import 'package:smartnews/features/auth/domain/repositories/auth_repository.dart';
 
-// Create provider
 final authRepositoryProvider = Provider<IAuthRepository>((ref) {
   final authDatasource = ref.read(authLocalDatasourceProvider);
   final authRemoteDatasource = ref.read(authRemoteDatasourceProvider);
@@ -40,7 +40,6 @@ class AuthRepository implements IAuthRepository {
   Future<Either<Failure, bool>> register(AuthEntity user) async {
     if (await _networkInfo.isConnected) {
       try {
-        // remote ma ja
         final apiModel = AuthApiModel.fromEntity(user);
         await _authRemoteDataSource.register(apiModel);
         return const Right(true);
@@ -56,14 +55,12 @@ class AuthRepository implements IAuthRepository {
       }
     } else {
       try {
-        // Check if email already exists
         final existingUser = await _authDataSource.getUserByEmail(user.email);
         if (existingUser != null) {
           return const Left(
             LocalDatabaseFailure(message: "Email already registered"),
           );
         }
-
         final authModel = AuthHiveModel(
           fullName: user.fullName,
           email: user.email,
@@ -87,10 +84,7 @@ class AuthRepository implements IAuthRepository {
     if (await _networkInfo.isConnected) {
       try {
         final apiModel = await _authRemoteDataSource.login(email, password);
-        if (apiModel != null) {
-          final entity = apiModel.toEntity();
-          return Right(entity);
-        }
+        if (apiModel != null) return Right(apiModel.toEntity());
         return const Left(ApiFailure(message: "Invalid credentials"));
       } on DioException catch (e) {
         return Left(
@@ -105,10 +99,7 @@ class AuthRepository implements IAuthRepository {
     } else {
       try {
         final model = await _authDataSource.login(email, password);
-        if (model != null) {
-          final entity = model.toEntity();
-          return Right(entity);
-        }
+        if (model != null) return Right(model.toEntity());
         return const Left(
           LocalDatabaseFailure(message: "Invalid email or password"),
         );
@@ -122,10 +113,7 @@ class AuthRepository implements IAuthRepository {
   Future<Either<Failure, AuthEntity>> getCurrentUser() async {
     try {
       final model = await _authDataSource.getCurrentUser();
-      if (model != null) {
-        final entity = model.toEntity();
-        return Right(entity);
-      }
+      if (model != null) return Right(model.toEntity());
       return const Left(LocalDatabaseFailure(message: "No user logged in"));
     } catch (e) {
       return Left(LocalDatabaseFailure(message: e.toString()));
@@ -135,11 +123,12 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<Either<Failure, bool>> logout() async {
     try {
-      final result = await _authDataSource.logout();
-      if (result) {
-        return const Right(true);
-      }
-      return const Left(LocalDatabaseFailure(message: "Failed to logout"));
+      // Clear Hive session
+      await _authDataSource.logout();
+      // ✅ Clear token from SharedPreferences too
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('auth_token');
+      return const Right(true);
     } catch (e) {
       return Left(LocalDatabaseFailure(message: e.toString()));
     }
