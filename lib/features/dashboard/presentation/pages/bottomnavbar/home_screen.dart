@@ -1,5 +1,8 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:smartnews/features/dashboard/domain/entities/news_entity.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/category_news_screen.dart';
 import 'package:smartnews/features/dashboard/presentation/pages/news_detail_screen.dart';
@@ -13,12 +16,66 @@ class HomeTab extends ConsumerStatefulWidget {
 }
 
 class _HomeTabState extends ConsumerState<HomeTab> {
+  // ── Shake detection ────────────────────────────────────────────────────────
+  StreamSubscription<AccelerometerEvent>? _accelerometerSub;
+  DateTime? _lastShakeTime;
+  static const double _shakeThreshold = 15.0;
+  bool _isRefreshing = false;
+
   @override
   void initState() {
     super.initState();
     Future.microtask(
       () => ref.read(newsViewModelProvider.notifier).loadHomeData(),
     );
+    _startShakeDetection();
+  }
+
+  void _startShakeDetection() {
+    _accelerometerSub = accelerometerEventStream().listen((event) {
+      final magnitude = sqrt(
+        event.x * event.x + event.y * event.y + event.z * event.z,
+      );
+
+      if (magnitude > _shakeThreshold) {
+        final now = DateTime.now();
+        // Debounce — only trigger once every 2 seconds
+        if (_lastShakeTime == null ||
+            now.difference(_lastShakeTime!) > const Duration(seconds: 2)) {
+          _lastShakeTime = now;
+          _onShakeRefresh();
+        }
+      }
+    });
+  }
+
+  void _onShakeRefresh() {
+    if (_isRefreshing) return;
+    setState(() => _isRefreshing = true);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.refresh, color: Colors.white),
+            SizedBox(width: 8),
+            Text('Refreshing news...'),
+          ],
+        ),
+        duration: Duration(seconds: 1),
+        backgroundColor: Color(0xFF4A7CFF),
+      ),
+    );
+
+    ref.read(newsViewModelProvider.notifier).loadHomeData().then((_) {
+      if (mounted) setState(() => _isRefreshing = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _accelerometerSub?.cancel();
+    super.dispose();
   }
 
   @override
@@ -55,9 +112,27 @@ class _HomeTabState extends ConsumerState<HomeTab> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Shake hint banner ───────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              color: const Color(0xFF0B2C4D),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.vibration, color: Colors.white70, size: 14),
+                  SizedBox(width: 6),
+                  Text(
+                    'Shake your phone to refresh news',
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+
             const SizedBox(height: 12),
 
-            // ── Recent / Latest News ──────────────────────────────────────
+            // ── Recent / Latest News ────────────────────────────────────────
             if (newsState.latestNews.isNotEmpty) ...[
               _sectionTitle('Recent News'),
               ...newsState.latestNews
@@ -65,7 +140,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   .map((news) => _recentNewsCard(news)),
             ],
 
-            // ── Category Sections ─────────────────────────────────────────
+            // ── Category Sections ───────────────────────────────────────────
             ...newsState.categoryPreviews.entries.map((entry) {
               final category = entry.key;
               final articles = entry.value;
@@ -90,8 +165,6 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     );
   }
 
-  // ─── Section Title ────────────────────────────────────────────────────────
-
   Widget _sectionTitle(String title, {bool seeMore = false, String? category}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -104,14 +177,12 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           ),
           if (seeMore && category != null)
             GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CategoryNewsScreen(category: category),
-                  ),
-                );
-              },
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CategoryNewsScreen(category: category),
+                ),
+              ),
               child: const Text(
                 'See More',
                 style: TextStyle(color: Colors.blue),
@@ -122,75 +193,118 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     );
   }
 
-  // ─── Recent News Card (large) ─────────────────────────────────────────────
-
   Widget _recentNewsCard(NewsEntity news) {
     return GestureDetector(
       onTap: () => _openDetail(news),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         height: 200,
+        clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: Colors.grey.shade300,
-          image: news.thumbnail != null && news.thumbnail!.isNotEmpty
-              ? DecorationImage(
-                  image: NetworkImage(news.thumbnail!),
-                  fit: BoxFit.cover,
-                  onError: (_, __) {},
-                )
-              : null,
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.transparent, Colors.black.withOpacity(0.85)],
-            ),
-          ),
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // ── Background image ──────────────────────────────────────────
+            if (news.thumbnail != null && news.thumbnail!.isNotEmpty)
+              Image.network(
+                news.thumbnail!,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 200,
+                errorBuilder: (_, __, ___) => Container(
+                  color: const Color(0xFF0B2C4D),
+                  child: const Icon(
+                    Icons.article_outlined,
+                    color: Colors.white30,
+                    size: 48,
+                  ),
+                ),
+              )
+            else
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4A7CFF),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  _capitalize(news.category),
-                  style: const TextStyle(color: Colors.white, fontSize: 10),
+                color: const Color(0xFF0B2C4D),
+                child: const Icon(
+                  Icons.article_outlined,
+                  color: Colors.white30,
+                  size: 48,
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(
-                news.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+
+            // ── Gradient overlay ──────────────────────────────────────────
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.4),
+                    Colors.black.withOpacity(0.9),
+                  ],
+                  stops: const [0.3, 0.6, 1.0],
                 ),
               ),
-              const SizedBox(height: 4),
-              if (news.publishedAt != null)
-                Text(
-                  _timeAgo(news.publishedAt!),
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                ),
-            ],
-          ),
+            ),
+
+            // ── Text content ──────────────────────────────────────────────
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 12,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4A7CFF),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      _capitalize(news.category),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    news.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  if (news.publishedAt != null)
+                    Text(
+                      _timeAgo(news.publishedAt!),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  // ─── Small News Card ──────────────────────────────────────────────────────
 
   Widget _smallNewsCard(NewsEntity news) {
     return GestureDetector(
@@ -240,8 +354,6 @@ class _HomeTabState extends ConsumerState<HomeTab> {
       ),
     );
   }
-
-  // ─── Helpers ──────────────────────────────────────────────────────────────
 
   void _openDetail(NewsEntity news) {
     Navigator.push(

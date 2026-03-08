@@ -62,8 +62,12 @@ dependencies:
   equatable: ^2.0.7
   dartz: ^0.10.1
 
-  share_plus: ^9.0.0
+  share_plus: 12.0.1
   timeago: ^3.6.1
+
+  sensors_plus: ^6.1.1
+  geolocator: 13.0.1
+  geocoding: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -86,5 +90,17 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-   - assets/images/logo.png
-   - assets/images/sportnews1.jpeg
+    - assets/images/
+    - assets/icons/
+    - assets/svg/
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
